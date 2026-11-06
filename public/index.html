@@ -1,0 +1,407 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Mesa de Ayuda - Gestión de Usuarios</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        brand: {
+                            navy: '#032147',
+                            green: '#208342',
+                            greenHover: '#196935',
+                            lime: '#97C03C',
+                            gold: '#FDC90A',
+                            lightGold: '#FFDF80',
+                            muted: '#888888'
+                        }
+                    }
+                }
+            }
+        };
+    </script>
+    <style>
+        body {
+            font-family: 'Segoe UI', system-ui, -apple-system, BlinkMacSystemFont, sans-serif;
+            background-color: #eef1f5;
+            background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='800' height='600' viewBox='0 0 800 600'%3E%3Cg fill='none' stroke='%23dce2ea' stroke-width='1'%3E%3Cpolygon fill='%23f5f7fa' points='0,0 240,0 160,180'/%3E%3Cpolygon fill='%23edf0f5' points='240,0 520,0 380,160 160,180'/%3E%3Cpolygon fill='%23f7f9fb' points='520,0 800,0 640,200 380,160'/%3E%3Cpolygon fill='%23e9edf2' points='800,0 800,280 640,200'/%3E%3Cpolygon fill='%23e8ecf2' points='0,0 160,180 0,320'/%3E%3Cpolygon fill='%23f3f5f8' points='160,180 380,160 290,360 80,380'/%3E%3Cpolygon fill='%23ebeef4' points='380,160 640,200 520,400 290,360'/%3E%3Cpolygon fill='%23f4f6f9' points='640,200 800,280 800,480 520,400'/%3E%3Cpolygon fill='%23f0f3f7' points='0,320 160,180 80,380 0,460'/%3E%3Cpolygon fill='%23e6ebf1' points='0,460 80,380 260,600 0,600'/%3E%3Cpolygon fill='%23f6f8fb' points='80,380 290,360 440,600 260,600'/%3E%3Cpolygon fill='%23edf1f6' points='290,360 520,400 620,600 440,600'/%3E%3Cpolygon fill='%23e7ecf2' points='520,400 800,480 800,600 620,600'/%3E%3C/g%3E%3C/svg%3E");
+            background-size: cover;
+            background-position: center;
+            background-attachment: fixed;
+        }
+    </style>
+</head>
+<body class="min-h-screen flex flex-col justify-between text-brand-navy antialiased selection:bg-brand-lightGold selection:text-brand-navy">
+
+    <!-- Barra Superior -->
+    <header class="w-full bg-brand-navy h-14 sm:h-16 px-6 sm:px-12 flex items-center justify-end shadow-md">
+        <span class="text-gray-300 text-xs sm:text-sm tracking-wide font-normal">
+            Mesa de Ayuda - Gestión de Usuarios
+        </span>
+    </header>
+
+    <!-- Contenido Principal -->
+    <main class="flex-1 flex flex-col items-center justify-center px-4 py-10">
+        
+        <!-- Tarjeta Central -->
+        <section class="w-full max-w-[460px] bg-white rounded-xl shadow-[0_14px_34px_rgba(3,33,71,0.10)] overflow-hidden">
+            
+            <!-- Linea Superior Acentuada Segmentada -->
+            <div class="w-full h-1.5 flex items-center">
+                <div class="h-full bg-brand-gold flex-1"></div>
+                <div class="w-2 h-full bg-white"></div>
+                <div class="w-6 h-full bg-brand-gold"></div>
+                <div class="w-2 h-full bg-white"></div>
+                <div class="w-16 h-full bg-brand-gold"></div>
+            </div>
+
+            <!-- Cuerpo de la Tarjeta -->
+            <div class="px-7 sm:px-10 pt-8 pb-7 text-center">
+                <h1 class="text-xl sm:text-[22px] font-bold text-brand-navy tracking-tight">
+                    Desbloqueo de Usuarios de Dominio
+                </h1>
+
+                <p class="mt-3 text-xs sm:text-sm text-brand-muted leading-relaxed max-w-[360px] mx-auto">
+                    Ingrese el usuario de red del colaborador para realizar el desbloqueo en el Active Directory.
+                </p>
+
+                <!-- Alerta de Permisos de Sesion (Oculta por defecto) -->
+                <div id="sessionAlert" class="hidden mt-4 px-4 py-2.5 rounded-lg bg-brand-lightGold/40 border border-brand-gold text-brand-navy text-xs text-left">
+                    <span id="sessionAlertText"></span>
+                </div>
+
+                <!-- Formulario -->
+                <form id="unlockForm" class="mt-6 space-y-4" novalidate>
+                    
+                    <!-- Campo de Usuario -->
+                    <div id="inputContainer" class="flex items-center w-full h-11 sm:h-12 rounded-full border border-gray-300 bg-white overflow-hidden transition-colors focus-within:border-brand-green focus-within:ring-2 focus-within:ring-brand-lime/25">
+                        <div class="w-12 h-full bg-gray-100 flex items-center justify-center text-gray-500 border-r border-gray-200 shrink-0">
+                            <svg xmlns="http://www.w3.org/2000/svg" class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.6">
+                                <path stroke-linecap="round" stroke-linejoin="round" d="M15.75 6a3.75 3.75 0 11-7.5 0 3.75 3.75 0 017.5 0zM4.501 20.118a7.5 7.5 0 0114.998 0A17.933 17.933 0 0112 21.75c-2.676 0-5.216-.584-7.499-1.632z" />
+                            </svg>
+                        </div>
+                        <input
+                            type="text"
+                            id="usernameInput"
+                            name="username"
+                            placeholder="nombre.apellido"
+                            autocomplete="off"
+                            spellcheck="false"
+                            aria-label="Usuario de dominio en formato nombre.apellido"
+                            class="w-full h-full px-4 text-sm text-brand-navy placeholder-brand-muted bg-transparent focus:outline-none"
+                        />
+                    </div>
+
+                    <!-- Mensaje de Ayuda de Formato -->
+                    <p id="formatHint" class="hidden text-[11px] text-left pl-4 text-amber-700">
+                        Utilice el formato de cuenta de dominio: nombre.apellido
+                    </p>
+
+                    <!-- Boton de Accion -->
+                    <button
+                        type="submit"
+                        id="unlockBtn"
+                        disabled
+                        class="w-full h-11 sm:h-12 rounded-full bg-brand-green hover:bg-brand-greenHover active:scale-[0.99] text-white font-medium text-sm flex items-center justify-center gap-2.5 shadow-sm transition-all disabled:opacity-50 disabled:pointer-events-none cursor-pointer"
+                    >
+                        <svg id="btnIcon" xmlns="http://www.w3.org/2000/svg" class="w-4 h-4 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.8">
+                            <path stroke-linecap="round" stroke-linejoin="round" d="M13.5 10.5V6.75a4.5 4.5 0 119 0v3.75M3.75 21.75h10.5a2.25 2.25 0 002.25-2.25v-6.75a2.25 2.25 0 00-2.25-2.25H3.75a2.25 2.25 0 00-2.25 2.25v6.75a2.25 2.25 0 002.25 2.25z" />
+                        </svg>
+                        <span id="btnText">Desbloquear Usuario</span>
+                    </button>
+                </form>
+
+                <!-- Nota al Pie Interna -->
+                <p class="mt-5 text-xs text-brand-navy font-medium">
+                    Solo se procesarán cuentas habilitadas.
+                </p>
+            </div>
+        </section>
+
+        <!-- Indicador Inferior de Conexion al Dominio -->
+        <div class="mt-5 flex items-center justify-center gap-2 text-xs text-gray-600">
+            <span id="statusDot" class="w-2.5 h-2.5 rounded-full bg-brand-lime inline-block"></span>
+            <span id="statusText">Conectado al Dominio</span>
+        </div>
+
+    </main>
+
+    <!-- Espaciador Inferior -->
+    <footer class="h-6"></footer>
+
+    <!-- Modal de Notificacion -->
+    <div
+        id="resultModal"
+        role="dialog"
+        aria-modal="true"
+        aria-labelledby="modalTitle"
+        class="fixed inset-0 z-50 hidden items-center justify-center px-4 bg-brand-navy/50 backdrop-blur-[2px] transition-opacity"
+    >
+        <div class="w-full max-w-md bg-white rounded-xl shadow-2xl overflow-hidden transform transition-all">
+            <!-- Barra Superior del Modal -->
+            <div class="w-full h-1.5 flex items-center">
+                <div id="modalAccentMain" class="h-full bg-brand-lime flex-1"></div>
+                <div class="w-2 h-full bg-white"></div>
+                <div id="modalAccentMid" class="w-6 h-full bg-brand-lime"></div>
+                <div class="w-2 h-full bg-white"></div>
+                <div id="modalAccentEnd" class="w-16 h-full bg-brand-lime"></div>
+            </div>
+
+            <div class="p-6 sm:p-8 text-center">
+                <!-- Icono Estado -->
+                <div id="modalIconWrapper" class="w-12 h-12 rounded-full mx-auto flex items-center justify-center bg-brand-lime/15 text-brand-green">
+                    <svg id="modalIconSuccess" xmlns="http://www.w3.org/2000/svg" class="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                        <path stroke-linecap="round" stroke-linejoin="round" d="M4.5 12.75l6 6 9-13.5" />
+                    </svg>
+                    <svg id="modalIconError" xmlns="http://www.w3.org/2000/svg" class="w-6 h-6 hidden" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                        <path stroke-linecap="round" stroke-linejoin="round" d="M12 9v3.75m9-.75a9 9 0 11-18 0 9 9 0 0118 0zm-9 3.75h.008v.008H12v-.008z" />
+                    </svg>
+                </div>
+
+                <h2 id="modalTitle" class="mt-4 text-lg font-bold text-brand-navy">
+                    Resultado de la operación
+                </h2>
+
+                <p id="modalUserBadge" class="mt-1.5 inline-block px-3 py-0.5 rounded-full bg-gray-100 text-xs font-mono text-brand-navy">
+                </p>
+
+                <p id="modalMessage" class="mt-3 text-sm text-brand-muted leading-relaxed">
+                </p>
+
+                <div class="mt-6">
+                    <button
+                        type="button"
+                        id="closeModalBtn"
+                        class="w-full h-10 rounded-full bg-brand-green hover:bg-brand-greenHover text-white text-sm font-medium transition-colors cursor-pointer"
+                    >
+                        Aceptar
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Logica del Cliente (Vanilla JS) -->
+    <script>
+        (function () {
+            'use strict';
+
+            const form = document.getElementById('unlockForm');
+            const usernameInput = document.getElementById('usernameInput');
+            const unlockBtn = document.getElementById('unlockBtn');
+            const btnText = document.getElementById('btnText');
+            const formatHint = document.getElementById('formatHint');
+
+            const sessionAlert = document.getElementById('sessionAlert');
+            const sessionAlertText = document.getElementById('sessionAlertText');
+            const statusDot = document.getElementById('statusDot');
+            const statusText = document.getElementById('statusText');
+
+            const resultModal = document.getElementById('resultModal');
+            const closeModalBtn = document.getElementById('closeModalBtn');
+            const modalTitle = document.getElementById('modalTitle');
+            const modalUserBadge = document.getElementById('modalUserBadge');
+            const modalMessage = document.getElementById('modalMessage');
+            const modalIconWrapper = document.getElementById('modalIconWrapper');
+            const modalIconSuccess = document.getElementById('modalIconSuccess');
+            const modalIconError = document.getElementById('modalIconError');
+            const modalAccentMain = document.getElementById('modalAccentMain');
+            const modalAccentMid = document.getElementById('modalAccentMid');
+            const modalAccentEnd = document.getElementById('modalAccentEnd');
+
+            let isSessionAuthorized = true;
+            let isSubmitting = false;
+
+            // Patrón de validación: formato nombre.apellido (letras, números, guiones y al menos un punto intermedio)
+            const USERNAME_REGEX = /^[a-zA-Z0-9_-]+(\.[a-zA-Z0-9_-]+)+$/;
+
+            function isValidUsername(value) {
+                return USERNAME_REGEX.test(value.trim());
+            }
+
+            function updateButtonState() {
+                const rawValue = usernameInput.value;
+                const trimmed = rawValue.trim();
+                const valid = isValidUsername(trimmed);
+
+                if (trimmed.length > 0 && !valid) {
+                    formatHint.classList.remove('hidden');
+                } else {
+                    formatHint.classList.add('hidden');
+                }
+
+                unlockBtn.disabled = !valid || !isSessionAuthorized || isSubmitting;
+            }
+
+            function setSubmittingState(submitting) {
+                isSubmitting = submitting;
+                usernameInput.readOnly = submitting;
+                btnText.textContent = submitting ? 'Procesando...' : 'Desbloquear Usuario';
+                updateButtonState();
+            }
+
+            function showModal(options) {
+                const isSuccess = Boolean(options.success);
+                const title = options.title || (isSuccess ? 'Desbloqueo exitoso' : 'No se pudo completar la acción');
+                const message = options.message || '';
+                const username = options.username || '';
+
+                modalTitle.textContent = title;
+                modalMessage.textContent = message;
+
+                if (username) {
+                    modalUserBadge.textContent = username;
+                    modalUserBadge.classList.remove('hidden');
+                } else {
+                    modalUserBadge.textContent = '';
+                    modalUserBadge.classList.add('hidden');
+                }
+
+                const accentColor = isSuccess ? 'bg-brand-lime' : 'bg-brand-gold';
+                [modalAccentMain, modalAccentMid, modalAccentEnd].forEach(function (el) {
+                    el.classList.remove('bg-brand-lime', 'bg-brand-gold');
+                    el.classList.add(accentColor);
+                });
+
+                if (isSuccess) {
+                    modalIconWrapper.className = 'w-12 h-12 rounded-full mx-auto flex items-center justify-center bg-brand-lime/15 text-brand-green';
+                    modalIconSuccess.classList.remove('hidden');
+                    modalIconError.classList.add('hidden');
+                } else {
+                    modalIconWrapper.className = 'w-12 h-12 rounded-full mx-auto flex items-center justify-center bg-brand-lightGold/50 text-brand-navy';
+                    modalIconSuccess.classList.add('hidden');
+                    modalIconError.classList.remove('hidden');
+                }
+
+                resultModal.classList.remove('hidden');
+                resultModal.classList.add('flex');
+                closeModalBtn.focus();
+            }
+
+            function hideModal() {
+                resultModal.classList.add('hidden');
+                resultModal.classList.remove('flex');
+                usernameInput.focus();
+            }
+
+            async function checkSession() {
+                try {
+                    const response = await fetch('/api/session', {
+                        method: 'GET',
+                        headers: { 'Accept': 'application/json' }
+                    });
+
+                    if (response.status === 404) {
+                        // Endpoint aún no activo (Fase 3 standalone)
+                        return;
+                    }
+
+                    const data = await response.json();
+                    if (data && data.user) {
+                        statusText.textContent = 'Conectado al Dominio (' + data.user + ')';
+                    }
+
+                    if (response.status === 403 || (data && data.authorized === false)) {
+                        isSessionAuthorized = false;
+                        statusDot.classList.remove('bg-brand-lime');
+                        statusDot.classList.add('bg-brand-gold');
+                        statusText.textContent = 'Sesión sin permisos (' + (data && data.user ? data.user : 'No autorizado') + ')';
+                        sessionAlertText.textContent = data.message || 'Acceso restringido: su cuenta no pertenece al grupo autorizado para desbloqueo.';
+                        sessionAlert.classList.remove('hidden');
+                        usernameInput.disabled = true;
+                        updateButtonState();
+                    }
+                } catch (_err) {
+                    statusDot.classList.remove('bg-brand-lime');
+                    statusDot.classList.add('bg-brand-gold');
+                    statusText.textContent = 'Servidor local desconectado';
+                }
+            }
+
+            usernameInput.addEventListener('input', updateButtonState);
+
+            closeModalBtn.addEventListener('click', hideModal);
+
+            resultModal.addEventListener('click', function (event) {
+                if (event.target === resultModal) {
+                    hideModal();
+                }
+            });
+
+            document.addEventListener('keydown', function (event) {
+                if (event.key === 'Escape' && !resultModal.classList.contains('hidden')) {
+                    hideModal();
+                }
+            });
+
+            form.addEventListener('submit', async function (event) {
+                event.preventDefault();
+
+                const username = usernameInput.value.trim().toLowerCase();
+                if (!isValidUsername(username) || !isSessionAuthorized || isSubmitting) {
+                    return;
+                }
+
+                setSubmittingState(true);
+
+                try {
+                    const response = await fetch('/api/unlock', {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json',
+                            'Accept': 'application/json'
+                        },
+                        body: JSON.stringify({ username: username })
+                    });
+
+                    let payload = null;
+                    const contentType = response.headers.get('content-type') || '';
+                    if (contentType.indexOf('application/json') !== -1) {
+                        payload = await response.json();
+                    }
+
+                    const badgeLabel = (payload && payload.user && payload.user.displayName)
+                        ? username + ' (' + payload.user.displayName + ')'
+                        : username;
+
+                    if (response.ok && payload && payload.success) {
+                        showModal({
+                            success: true,
+                            title: payload.title || 'Desbloqueo exitoso',
+                            username: badgeLabel,
+                            message: payload.message || 'La cuenta del colaborador ha sido desbloqueada correctamente en el Directorio Activo.'
+                        });
+                        usernameInput.value = '';
+                    } else {
+                        const errorMsg = (payload && payload.message)
+                            ? payload.message
+                            : 'No fue posible procesar la solicitud en el servidor (HTTP ' + response.status + ').';
+                        showModal({
+                            success: false,
+                            title: (payload && payload.title) ? payload.title : 'Error al desbloquear',
+                            username: badgeLabel,
+                            message: errorMsg
+                        });
+                    }
+                } catch (_error) {
+                    showModal({
+                        success: false,
+                        title: 'Error de conexión',
+                        username: username,
+                        message: 'No se pudo establecer comunicación con el servicio local de PowerShell.'
+                    });
+                } finally {
+                    setSubmittingState(false);
+                }
+            });
+
+            updateButtonState();
+            checkSession();
+        })();
+    </script>
+</body>
+</html>
