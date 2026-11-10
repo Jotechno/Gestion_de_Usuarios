@@ -1,4 +1,4 @@
-# Plan de Ejecucion del Proyecto: Desbloqueo de Usuarios MVP
+# Plan de Ejecucion del Proyecto: Desbloqueo y Gestion de Usuarios
 
 ## Estructura de Directorios Propuesta
 
@@ -14,14 +14,14 @@ DesbloqueoUsuarios/
 │   └── index.html             # Interfaz de usuario anonima (HTML5, Tailwind CSS CDN y Vanilla JS)
 ├── scripts/
 │   ├── server.ps1             # Servidor HTTP nativo con System.Net.HttpListener
-│   └── ad-service.ps1         # Logica de Active Directory (validacion de grupo, consulta y desbloqueo)
+│   └── ad-service.ps1         # Logica de Active Directory (validacion de grupo, consulta, desbloqueo y cambio de clave)
 └── tests/
     └── backend.Tests.ps1      # Pruebas automatizadas de funciones AD y endpoints HTTP
 ```
 
 ---
 
-## Parte 1: Planificacion
+## Parte 1: Planificacion (Fase 1 - MVP Desbloqueo)
 
 Enriquecer este documento para planificar cada una de las fases en detalle, con subpasos en lista de verificacion, pruebas y criterios de exito.
 
@@ -138,7 +138,7 @@ Completar `scripts/server.ps1` integrando `scripts/ad-service.ps1` para escuchar
 
 ---
 
-## Parte 7: Integracion Frontend + Backend y Pruebas Finales
+## Parte 7: Integracion Frontend + Backend y Pruebas Finales (Fase 1)
 
 Conectar el frontend con la API del backend para completar el flujo de extremo a extremo de desbloqueo de usuarios.
 
@@ -151,3 +151,98 @@ Conectar el frontend con la API del backend para completar el flujo de extremo a
 ### Pruebas y Criterios de Exito
 - **Prueba:** Flujo completo de principio a fin probando los escenarios de negocio y verificando el renderizado de la interfaz y respuestas del servidor.
 - **Criterio de exito:** La aplicacion opera de principio a fin sin dependencias externas, cumpliendo todas las reglas de `AGENTS.md` y `PLAN.md`.
+
+---
+---
+
+# Fase 2: Escalabilidad - Modulo de Cambio de Contrasena en Active Directory
+
+> **Restriccion Estricta de Pruebas (CRITICO):** Esta estrictamente prohibido utilizar usuarios aleatorios o el usuario personal del analista en las pruebas en vivo. Para TODAS las pruebas de esta fase se utilizara **UNICA Y EXCLUSIVAMENTE** la cuenta de pruebas: `henkia.pruebas`.
+
+---
+
+## Parte 8: Planificacion de la Fase 2 (Cambio de Contrasena)
+
+Definir la arquitectura funcional, reglas de validacion y plan de trabajo para incorporar el restablecimiento de contrasenas desde la interfaz web.
+
+### Lista de verificacion
+- [x] 8.1. Analizar requerimientos de interfaz (botones 50/50, modal inspirado en la ventana nativa de AD) y comandos de Active Directory (`Set-ADAccountPassword`, `Set-ADUser -ChangePasswordAtLogon`, `Unlock-ADAccount`).
+- [x] 8.2. Resolver preguntas abiertas con el usuario (validacion previa en AD al pulsar "Cambiar Contrasena", validacion de coincidencia de campos en el modal, boton "Aceptar" deshabilitado hasta coincidencia y estado inicial de los checkboxes).
+- [x] 8.3. Actualizar `AGENTS.md` y `docs/PLAN.md` con las especificaciones y fases detalladas (Partes 8 a 11).
+- [x] 8.4. Obtener aprobacion del usuario para iniciar la Parte 9.
+
+### Pruebas y Criterios de Exito
+- **Prueba:** Revision del plan actualizado en `docs/PLAN.md` y `AGENTS.md` por parte del usuario.
+- **Criterio de exito:** El usuario aprueba formalmente el plan de la Fase 2 para comenzar con la Parte 9.
+
+---
+
+## Parte 9: Logica de Active Directory y Endpoints Backend para Cambio de Contrasena
+
+Implementar en `scripts/ad-service.ps1` y `scripts/server.ps1` la consulta previa de estado del usuario y la ejecucion del cambio de contrasena junto con sus opciones en Active Directory.
+
+### Lista de verificacion
+- [x] 9.1. Implementar en `scripts/ad-service.ps1` la funcion `Invoke-UserStatusCheck` para validar que el usuario ingresado exista y este **HABILITADO** (`Enabled = $true`), retornando su `DisplayName` y estado actual de bloqueo (`LockedOut`) para mostrarlo en el modal de contrasena. Si no existe (`HTTP 404`) o esta **INHABILITADO** (`HTTP 422`), rechazar la apertura del modal.
+- [x] 9.2. Implementar en `scripts/ad-service.ps1` la funcion `Invoke-UserPasswordReset` con las siguientes reglas:
+  - Validar formato de `username`, que `newPassword` y `confirmPassword` no esten vacios y que sean identicos (`HTTP 400` en caso contrario).
+  - Consultar el usuario en AD y verificar que exista (`HTTP 404`) y este **HABILITADO** (`Enabled = $true`; si es `$false`, retornar `HTTP 422 ACCOUNT_DISABLED` sin modificar nada).
+  - Convertir la contrasena a `SecureString` (`ConvertTo-SecureString -AsPlainText -Force`) y ejecutar `Set-ADAccountPassword -Identity <usuario> -Reset -NewPassword <SecureString> -ErrorAction Stop`.
+  - Ejecutar `Set-ADUser -Identity <usuario> -ChangePasswordAtLogon <bool> -ErrorAction Stop` segun el valor del primer checkbox.
+  - Si el segundo checkbox (`unlockAccount`) fue marcado como `$true`, ejecutar `Unlock-ADAccount -Identity <usuario> -ErrorAction Stop`.
+- [x] 9.3. Implementar los controladores HTTP `Invoke-UserStatusApiController` y `Invoke-PasswordResetApiController` en `scripts/ad-service.ps1`, y registrar en `scripts/server.ps1` las rutas:
+  - `POST /api/user-status`
+  - `POST /api/reset-password`
+- [x] 9.4. Ampliar las pruebas unitarias en `tests/backend.Tests.ps1` (con mocks inyectados) para validar todos los escenarios de `Invoke-UserStatusCheck` e `Invoke-UserPasswordReset` (contrasenas distintas, cuenta inexistente, cuenta inhabilitada, cambio exitoso con `ChangePasswordAtLogon` y desbloqueo simultaneo).
+
+### Pruebas y Criterios de Exito
+- **Prueba:** Ejecucion de las pruebas unitarias en `tests/backend.Tests.ps1`.
+- **Criterio de exito:** Todas las pruebas unitarias pasan, garantizando que nunca se cambie la contrasena de una cuenta inhabilitada y que los parametros `ChangePasswordAtLogon` y `Unlock-ADAccount` se apliquen segun lo indicado.
+
+---
+
+## Parte 10: Frontend (Botones 50/50 y Modal "Restablecer contrasena")
+
+Actualizar `public/index.html` para incorporar la disposicion de botones 50/50 y el nuevo modal de cambio de contrasena basado en el dialogo nativo de Active Directory.
+
+### Lista de verificacion
+- [x] 10.1. Ajustar el contenedor de acciones del formulario principal en `public/index.html` para dividir el espacio en dos columnas iguales (50/50):
+  - Izquierda: Boton `"Desbloquear Usuario"` en Verde Secundario (`#208342`).
+  - Derecha: Boton `"Cambiar Contrasena"` en Verde Oscuro diferenciador (`#14532A`, hover `#0F3F20`) con icono SVG de llave/candado en linea fina.
+  - Ambos botones permanecen deshabilitados hasta ingresar un usuario con formato `nombre.apellido` valido.
+- [x] 10.2. Construir en `public/index.html` el modal `"Restablecer contrasena"` armonizado con la paleta del proyecto e incluyendo todos los elementos de la ventana nativa de AD:
+  - Encabezado con titulo `"Restablecer contrasena"`, badge del usuario seleccionado y boton de cierre (`X`).
+  - Campo `"Contrasena nueva:"` (`type="password"`).
+  - Campo `"Confirmar contrasena:"` (`type="password"`).
+  - Checkbox 1 (**marcado por defecto**): `"El usuario debe cambiar la contrasena en el siguiente inicio de sesion"` + texto secundario indentado: `"El usuario ha de cerrar la sesion y volver a abrirla para que los cambios tengan efecto."`
+  - Etiqueta de estado: `"Estado de bloqueo de cuenta en este controlador de dominio: Desbloqueado / Bloqueado"`.
+  - Checkbox 2 (**desmarcado por defecto**): `"Desbloquear la cuenta del usuario"`.
+  - Botones inferiores alineados a la derecha: `"Aceptar"` y `"Cancelar"`.
+- [x] 10.3. Implementar validacion en Vanilla JS para los campos del modal de contrasena:
+  - Mantener el boton `"Aceptar"` deshabilitado mientras alguno de los dos campos este vacio o las contrasenas no coincidan.
+  - Mostrar un aviso en linea dentro del modal cuando ambos campos tengan texto pero no coincidan.
+
+### Pruebas y Criterios de Exito
+- **Prueba:** Verificacion estructural y funcional de `public/index.html` (botones 50/50, apertura/cierre del modal, estado por defecto de los checkboxes y bloqueo del boton `"Aceptar"` ante campos vacios o distintos).
+- **Criterio de exito:** La interfaz respeta el diseno 50/50, el modal replica los controles nativos de AD con el estilo visual del proyecto, no contiene emojis y valida correctamente la coincidencia de contrasenas.
+
+---
+
+## Parte 11: Integracion Frontend + Backend y Pruebas E2E con `henkia.pruebas`
+
+Conectar el flujo completo del frontend con los nuevos endpoints del backend y ejecutar las pruebas integrales en vivo utilizando exclusivamente la cuenta `henkia.pruebas`.
+
+### Lista de verificacion
+- [x] 11.1. Conectar el clic en `"Cambiar Contrasena"` con `POST /api/user-status`:
+  - Mostrar estado de carga mientras se valida el usuario en AD.
+  - Si el usuario no existe o esta inhabilitado, mostrar el modal de notificacion con el error correspondiente.
+  - Si el usuario existe y esta habilitado, limpiar los campos del modal de contrasena, restablecer los checkboxes a sus valores por defecto, actualizar el texto `"Estado de bloqueo de cuenta en este controlador de dominio: Bloqueado / Desbloqueado"` y abrir el modal `"Restablecer contrasena"`.
+- [x] 11.2. Conectar el envio del modal `"Restablecer contrasena"` (boton `"Aceptar"`) con `POST /api/reset-password`:
+  - Enviar `{ username, newPassword, confirmPassword, changePasswordAtLogon, unlockAccount }`.
+  - Al finalizar, cerrar el modal de contrasena y abrir el modal de notificacion confirmando el `"Cambio de contrasena exitoso"` o detallando el error devuelto por Active Directory (ej. politicas de complejidad).
+- [x] 11.3. Actualizar la seccion `-IncludeLiveHttpTests` de `tests/backend.Tests.ps1` para que TODAS las pruebas en vivo utilicen **UNICA Y EXCLUSIVAMENTE** la cuenta `henkia.pruebas`, probando:
+  - Consulta de estado (`POST /api/user-status`) para `henkia.pruebas`.
+  - Cambio de contrasena, asignacion de `ChangePasswordAtLogon` y desbloqueo simultaneo (`POST /api/reset-password`) sobre `henkia.pruebas`.
+
+### Pruebas y Criterios de Exito
+- **Prueba:** Ejecucion completa de `tests/backend.Tests.ps1 -IncludeLiveHttpTests` operando exclusivamente sobre `henkia.pruebas`.
+- **Criterio de exito:** Todas las pruebas unitarias y E2E en vivo aprueban sin errores, respetando estrictamente la restriccion de usar solo `henkia.pruebas`.

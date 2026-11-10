@@ -106,6 +106,18 @@ try {
                 $timestamp = (Get-Date).ToString('HH:mm:ss')
                 Write-Host "[$timestamp] POST /api/unlock | Codigo: $($apiResult.body.code) | HTTP $($apiResult.httpStatus)"
                 Send-JsonResponse -Response $response -StatusCode $apiResult.httpStatus -BodyObject $apiResult.body
+            } elseif ($method -eq 'POST' -and $path -eq '/api/user-status') {
+                $rawBody = Read-RequestBody -Request $request
+                $apiResult = Invoke-UserStatusApiController -SessionInfo $sessionInfo -RawBody $rawBody
+                $timestamp = (Get-Date).ToString('HH:mm:ss')
+                Write-Host "[$timestamp] POST /api/user-status | Codigo: $($apiResult.body.code) | HTTP $($apiResult.httpStatus)"
+                Send-JsonResponse -Response $response -StatusCode $apiResult.httpStatus -BodyObject $apiResult.body
+            } elseif ($method -eq 'POST' -and $path -eq '/api/reset-password') {
+                $rawBody = Read-RequestBody -Request $request
+                $apiResult = Invoke-PasswordResetApiController -SessionInfo $sessionInfo -RawBody $rawBody
+                $timestamp = (Get-Date).ToString('HH:mm:ss')
+                Write-Host "[$timestamp] POST /api/reset-password | Codigo: $($apiResult.body.code) | HTTP $($apiResult.httpStatus)"
+                Send-JsonResponse -Response $response -StatusCode $apiResult.httpStatus -BodyObject $apiResult.body
             } elseif ($path -like '/api/*') {
                 if (-not $sessionInfo.authorized) {
                     Send-JsonResponse -Response $response -StatusCode 403 -BodyObject @{

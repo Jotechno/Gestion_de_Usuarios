@@ -14,6 +14,8 @@
                             navy: '#032147',
                             green: '#208342',
                             greenHover: '#196935',
+                            darkGreen: '#14532A',
+                            darkGreenHover: '#0F3F20',
                             lime: '#97C03C',
                             gold: '#FDC90A',
                             lightGold: '#FFDF80',
@@ -48,7 +50,7 @@
     <main class="flex-1 flex flex-col items-center justify-center px-4 py-10">
         
         <!-- Tarjeta Central -->
-        <section class="w-full max-w-[460px] bg-white rounded-xl shadow-[0_14px_34px_rgba(3,33,71,0.10)] overflow-hidden">
+        <section class="w-full max-w-[500px] bg-white rounded-xl shadow-[0_14px_34px_rgba(3,33,71,0.10)] overflow-hidden">
             
             <!-- Linea Superior Acentuada Segmentada -->
             <div class="w-full h-1.5 flex items-center">
@@ -60,13 +62,13 @@
             </div>
 
             <!-- Cuerpo de la Tarjeta -->
-            <div class="px-7 sm:px-10 pt-8 pb-7 text-center">
+            <div class="px-7 sm:px-9 pt-8 pb-7 text-center">
                 <h1 class="text-xl sm:text-[22px] font-bold text-brand-navy tracking-tight">
                     Desbloqueo de Usuarios de Dominio
                 </h1>
 
-                <p class="mt-3 text-xs sm:text-sm text-brand-muted leading-relaxed max-w-[360px] mx-auto">
-                    Ingrese el usuario de red del colaborador para realizar el desbloqueo en el Active Directory.
+                <p class="mt-3 text-xs sm:text-sm text-brand-muted leading-relaxed max-w-[380px] mx-auto">
+                    Ingrese el usuario de red del colaborador para realizar el desbloqueo o cambio de contraseña en el Active Directory.
                 </p>
 
                 <!-- Alerta de Permisos de Sesion (Oculta por defecto) -->
@@ -74,7 +76,7 @@
                     <span id="sessionAlertText"></span>
                 </div>
 
-                <!-- Formulario -->
+                <!-- Formulario Principal -->
                 <form id="unlockForm" class="mt-6 space-y-4" novalidate>
                     
                     <!-- Campo de Usuario -->
@@ -101,18 +103,34 @@
                         Utilice el formato de cuenta de dominio: nombre.apellido
                     </p>
 
-                    <!-- Boton de Accion -->
-                    <button
-                        type="submit"
-                        id="unlockBtn"
-                        disabled
-                        class="w-full h-11 sm:h-12 rounded-full bg-brand-green hover:bg-brand-greenHover active:scale-[0.99] text-white font-medium text-sm flex items-center justify-center gap-2.5 shadow-sm transition-all disabled:opacity-50 disabled:pointer-events-none cursor-pointer"
-                    >
-                        <svg id="btnIcon" xmlns="http://www.w3.org/2000/svg" class="w-4 h-4 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.8">
-                            <path stroke-linecap="round" stroke-linejoin="round" d="M13.5 10.5V6.75a4.5 4.5 0 119 0v3.75M3.75 21.75h10.5a2.25 2.25 0 002.25-2.25v-6.75a2.25 2.25 0 00-2.25-2.25H3.75a2.25 2.25 0 00-2.25 2.25v6.75a2.25 2.25 0 002.25 2.25z" />
-                        </svg>
-                        <span id="btnText">Desbloquear Usuario</span>
-                    </button>
+                    <!-- Contenedor de Botones 50/50 -->
+                    <div class="grid grid-cols-1 sm:grid-cols-2 gap-3 pt-1">
+                        <!-- Boton Izquierdo (50%): Desbloquear Usuario -->
+                        <button
+                            type="submit"
+                            id="unlockBtn"
+                            disabled
+                            class="w-full h-11 sm:h-12 px-4 rounded-full bg-brand-green hover:bg-brand-greenHover active:scale-[0.99] text-white font-medium text-xs sm:text-sm flex items-center justify-center gap-2 shadow-sm transition-all disabled:opacity-50 disabled:pointer-events-none cursor-pointer"
+                        >
+                            <svg id="btnIcon" xmlns="http://www.w3.org/2000/svg" class="w-4 h-4 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.8">
+                                <path stroke-linecap="round" stroke-linejoin="round" d="M13.5 10.5V6.75a4.5 4.5 0 119 0v3.75M3.75 21.75h10.5a2.25 2.25 0 002.25-2.25v-6.75a2.25 2.25 0 00-2.25-2.25H3.75a2.25 2.25 0 00-2.25 2.25v6.75a2.25 2.25 0 002.25 2.25z" />
+                            </svg>
+                            <span id="btnText">Desbloquear Usuario</span>
+                        </button>
+
+                        <!-- Boton Derecho (50%): Cambiar Contrasena -->
+                        <button
+                            type="button"
+                            id="openPasswordModalBtn"
+                            disabled
+                            class="w-full h-11 sm:h-12 px-4 rounded-full bg-brand-darkGreen hover:bg-brand-darkGreenHover active:scale-[0.99] text-white font-medium text-xs sm:text-sm flex items-center justify-center gap-2 shadow-sm transition-all disabled:opacity-50 disabled:pointer-events-none cursor-pointer"
+                        >
+                            <svg xmlns="http://www.w3.org/2000/svg" class="w-4 h-4 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.8">
+                                <path stroke-linecap="round" stroke-linejoin="round" d="M15.75 5.25a3 3 0 013 3m3 0a6 6 0 01-7.029 5.912c-.563-.097-1.159.026-1.563.43L10.5 17.25H8.25v2.25H6v2.25H2.25v-2.818c0-.597.237-1.17.659-1.591l6.499-6.499c.404-.404.527-1 .43-1.563A6 6 0 1121.75 8.25z" />
+                            </svg>
+                            <span id="pwdBtnText">Cambiar Contraseña</span>
+                        </button>
+                    </div>
                 </form>
 
                 <!-- Nota al Pie Interna -->
@@ -133,7 +151,146 @@
     <!-- Espaciador Inferior -->
     <footer class="h-6"></footer>
 
-    <!-- Modal de Notificacion -->
+    <!-- Modal de Restablecimiento de Contrasena (Inspirado en ventana nativa de AD) -->
+    <div
+        id="passwordModal"
+        role="dialog"
+        aria-modal="true"
+        aria-labelledby="passwordModalTitle"
+        class="fixed inset-0 z-40 hidden items-center justify-center px-4 bg-brand-navy/50 backdrop-blur-[2px] transition-opacity"
+    >
+        <div class="w-full max-w-[480px] bg-white rounded-xl shadow-2xl overflow-hidden transform transition-all">
+            <!-- Barra Superior Acentuada Segmentada -->
+            <div class="w-full h-1.5 flex items-center">
+                <div class="h-full bg-brand-gold flex-1"></div>
+                <div class="w-2 h-full bg-white"></div>
+                <div class="w-6 h-full bg-brand-gold"></div>
+                <div class="w-2 h-full bg-white"></div>
+                <div class="w-16 h-full bg-brand-gold"></div>
+            </div>
+
+            <!-- Encabezado del Modal estilo ventana de AD -->
+            <div class="px-6 pt-5 pb-3 border-b border-gray-200 flex items-center justify-between">
+                <div>
+                    <h2 id="passwordModalTitle" class="text-base sm:text-lg font-bold text-brand-navy">
+                        Restablecer contraseña
+                    </h2>
+                    <p id="pwdModalUserBadge" class="mt-0.5 text-xs font-mono text-brand-muted"></p>
+                </div>
+                <button
+                    type="button"
+                    id="closePasswordModalX"
+                    aria-label="Cerrar ventana de restablecer contraseña"
+                    class="w-8 h-8 rounded-full flex items-center justify-center text-gray-400 hover:text-brand-navy hover:bg-gray-100 transition-colors cursor-pointer"
+                >
+                    <svg xmlns="http://www.w3.org/2000/svg" class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.8">
+                        <path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12" />
+                    </svg>
+                </button>
+            </div>
+
+            <!-- Formulario del Modal de Contrasena -->
+            <form id="passwordResetForm" class="px-6 py-5 space-y-4 text-left" novalidate>
+                
+                <!-- Campo: Contrasena nueva -->
+                <div class="grid grid-cols-1 sm:grid-cols-12 sm:items-center gap-1.5 sm:gap-3">
+                    <label for="newPasswordInput" class="sm:col-span-5 text-xs sm:text-sm font-medium text-brand-navy">
+                        Contraseña nueva:
+                    </label>
+                    <div class="sm:col-span-7">
+                        <input
+                            type="password"
+                            id="newPasswordInput"
+                            name="newPassword"
+                            autocomplete="new-password"
+                            class="w-full h-10 px-3.5 rounded-lg border border-gray-300 text-sm text-brand-navy focus:outline-none focus:border-brand-green focus:ring-2 focus:ring-brand-lime/25"
+                        />
+                    </div>
+                </div>
+
+                <!-- Campo: Confirmar contrasena -->
+                <div class="grid grid-cols-1 sm:grid-cols-12 sm:items-center gap-1.5 sm:gap-3">
+                    <label for="confirmPasswordInput" class="sm:col-span-5 text-xs sm:text-sm font-medium text-brand-navy">
+                        Confirmar contraseña:
+                    </label>
+                    <div class="sm:col-span-7">
+                        <input
+                            type="password"
+                            id="confirmPasswordInput"
+                            name="confirmPassword"
+                            autocomplete="new-password"
+                            class="w-full h-10 px-3.5 rounded-lg border border-gray-300 text-sm text-brand-navy focus:outline-none focus:border-brand-green focus:ring-2 focus:ring-brand-lime/25"
+                        />
+                    </div>
+                </div>
+
+                <!-- Aviso en linea cuando las contrasenas no coinciden -->
+                <p id="passwordMismatchHint" class="hidden text-xs text-amber-700 bg-brand-lightGold/40 border border-brand-gold px-3 py-1.5 rounded-md">
+                    Las contraseñas ingresadas no coinciden.
+                </p>
+
+                <!-- Checkbox 1: Cambiar contrasena en el siguiente inicio de sesion (Marcado por defecto) -->
+                <div class="pt-1">
+                    <label class="flex items-start gap-2.5 cursor-pointer select-none">
+                        <input
+                            type="checkbox"
+                            id="changeAtLogonCheckbox"
+                            checked
+                            class="mt-0.5 w-4 h-4 rounded border-gray-300 text-brand-green focus:ring-brand-lime accent-[#208342]"
+                        />
+                        <span class="text-xs sm:text-sm text-brand-navy leading-snug">
+                            El usuario debe cambiar la contraseña en el siguiente inicio de sesión
+                        </span>
+                    </label>
+                    <p class="mt-1.5 pl-6 text-xs text-brand-muted leading-relaxed">
+                        El usuario ha de cerrar la sesión y volver a abrirla para que los cambios tengan efecto.
+                    </p>
+                </div>
+
+                <!-- Indicador de estado de bloqueo y Checkbox 2 (Desmarcado por defecto) -->
+                <div class="pt-2 border-t border-gray-100 space-y-2">
+                    <div class="text-xs sm:text-sm text-brand-navy">
+                        <span>Estado de bloqueo de cuenta en este controlador de dominio:</span>
+                        <span id="pwdModalLockStatusText" class="block font-semibold mt-0.5 text-brand-navy">
+                            Desbloqueado
+                        </span>
+                    </div>
+
+                    <label class="flex items-center gap-2.5 pl-2 cursor-pointer select-none">
+                        <input
+                            type="checkbox"
+                            id="unlockAccountCheckbox"
+                            class="w-4 h-4 rounded border-gray-300 text-brand-green focus:ring-brand-lime accent-[#208342]"
+                        />
+                        <span class="text-xs sm:text-sm text-brand-navy">
+                            Desbloquear la cuenta del usuario
+                        </span>
+                    </label>
+                </div>
+
+                <!-- Botones Aceptar y Cancelar -->
+                <div class="pt-4 border-t border-gray-200 flex items-center justify-end gap-3">
+                    <button
+                        type="submit"
+                        id="confirmPasswordResetBtn"
+                        disabled
+                        class="min-w-[115px] h-10 px-5 rounded-full bg-brand-darkGreen hover:bg-brand-darkGreenHover text-white text-xs sm:text-sm font-medium transition-all disabled:opacity-50 disabled:pointer-events-none cursor-pointer"
+                    >
+                        Aceptar
+                    </button>
+                    <button
+                        type="button"
+                        id="cancelPasswordModalBtn"
+                        class="min-w-[115px] h-10 px-5 rounded-full bg-gray-100 hover:bg-gray-200 text-brand-navy border border-gray-300 text-xs sm:text-sm font-medium transition-colors cursor-pointer"
+                    >
+                        Cancelar
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Modal de Notificacion de Resultado -->
     <div
         id="resultModal"
         role="dialog"
@@ -194,6 +351,8 @@
             const usernameInput = document.getElementById('usernameInput');
             const unlockBtn = document.getElementById('unlockBtn');
             const btnText = document.getElementById('btnText');
+            const openPasswordModalBtn = document.getElementById('openPasswordModalBtn');
+            const pwdBtnText = document.getElementById('pwdBtnText');
             const formatHint = document.getElementById('formatHint');
 
             const sessionAlert = document.getElementById('sessionAlert');
@@ -201,6 +360,21 @@
             const statusDot = document.getElementById('statusDot');
             const statusText = document.getElementById('statusText');
 
+            // Elementos del Modal de Contrasena
+            const passwordModal = document.getElementById('passwordModal');
+            const passwordResetForm = document.getElementById('passwordResetForm');
+            const pwdModalUserBadge = document.getElementById('pwdModalUserBadge');
+            const pwdModalLockStatusText = document.getElementById('pwdModalLockStatusText');
+            const newPasswordInput = document.getElementById('newPasswordInput');
+            const confirmPasswordInput = document.getElementById('confirmPasswordInput');
+            const passwordMismatchHint = document.getElementById('passwordMismatchHint');
+            const changeAtLogonCheckbox = document.getElementById('changeAtLogonCheckbox');
+            const unlockAccountCheckbox = document.getElementById('unlockAccountCheckbox');
+            const confirmPasswordResetBtn = document.getElementById('confirmPasswordResetBtn');
+            const cancelPasswordModalBtn = document.getElementById('cancelPasswordModalBtn');
+            const closePasswordModalX = document.getElementById('closePasswordModalX');
+
+            // Elementos del Modal de Notificacion
             const resultModal = document.getElementById('resultModal');
             const closeModalBtn = document.getElementById('closeModalBtn');
             const modalTitle = document.getElementById('modalTitle');
@@ -215,6 +389,8 @@
 
             let isSessionAuthorized = true;
             let isSubmitting = false;
+            let isResetSubmitting = false;
+            let activeTargetUser = '';
 
             // Patrón de validación: formato nombre.apellido (letras, números, guiones y al menos un punto intermedio)
             const USERNAME_REGEX = /^[a-zA-Z0-9_-]+(\.[a-zA-Z0-9_-]+)+$/;
@@ -234,19 +410,88 @@
                     formatHint.classList.add('hidden');
                 }
 
-                unlockBtn.disabled = !valid || !isSessionAuthorized || isSubmitting;
+                const disableMainActions = !valid || !isSessionAuthorized || isSubmitting;
+                unlockBtn.disabled = disableMainActions;
+                openPasswordModalBtn.disabled = disableMainActions;
             }
 
-            function setSubmittingState(submitting) {
+            function setSubmittingState(submitting, actionType) {
                 isSubmitting = submitting;
                 usernameInput.readOnly = submitting;
-                btnText.textContent = submitting ? 'Procesando...' : 'Desbloquear Usuario';
+                if (actionType === 'unlock') {
+                    btnText.textContent = submitting ? 'Procesando...' : 'Desbloquear Usuario';
+                } else if (actionType === 'check-status') {
+                    pwdBtnText.textContent = submitting ? 'Validando...' : 'Cambiar Contraseña';
+                } else {
+                    btnText.textContent = 'Desbloquear Usuario';
+                    pwdBtnText.textContent = 'Cambiar Contraseña';
+                }
                 updateButtonState();
+            }
+
+            function updatePasswordModalButtonState() {
+                const newPass = newPasswordInput.value;
+                const confirmPass = confirmPasswordInput.value;
+                const bothFilled = newPass.length > 0 && confirmPass.length > 0;
+                const matches = newPass === confirmPass;
+
+                if (bothFilled && !matches) {
+                    passwordMismatchHint.classList.remove('hidden');
+                } else {
+                    passwordMismatchHint.classList.add('hidden');
+                }
+
+                confirmPasswordResetBtn.disabled = !bothFilled || !matches || isResetSubmitting;
+            }
+
+            function openPasswordModal(userInfo) {
+                activeTargetUser = userInfo.username;
+                const label = userInfo.displayName
+                    ? userInfo.username + ' (' + userInfo.displayName + ')'
+                    : userInfo.username;
+
+                pwdModalUserBadge.textContent = label;
+                pwdModalLockStatusText.textContent = userInfo.lockedOut ? 'Bloqueado' : 'Desbloqueado';
+
+                // Valores por defecto definidos:
+                newPasswordInput.value = '';
+                confirmPasswordInput.value = '';
+                changeAtLogonCheckbox.checked = true;
+                unlockAccountCheckbox.checked = false;
+                passwordMismatchHint.classList.add('hidden');
+
+                updatePasswordModalButtonState();
+
+                passwordModal.classList.remove('hidden');
+                passwordModal.classList.add('flex');
+                newPasswordInput.focus();
+            }
+
+            function closePasswordModal() {
+                passwordModal.classList.add('hidden');
+                passwordModal.classList.remove('flex');
+                newPasswordInput.value = '';
+                confirmPasswordInput.value = '';
+                passwordMismatchHint.classList.add('hidden');
+                updatePasswordModalButtonState();
+                usernameInput.focus();
+            }
+
+            function setResetSubmittingState(submitting) {
+                isResetSubmitting = submitting;
+                newPasswordInput.readOnly = submitting;
+                confirmPasswordInput.readOnly = submitting;
+                changeAtLogonCheckbox.disabled = submitting;
+                unlockAccountCheckbox.disabled = submitting;
+                cancelPasswordModalBtn.disabled = submitting;
+                closePasswordModalX.disabled = submitting;
+                confirmPasswordResetBtn.textContent = submitting ? 'Procesando...' : 'Aceptar';
+                updatePasswordModalButtonState();
             }
 
             function showModal(options) {
                 const isSuccess = Boolean(options.success);
-                const title = options.title || (isSuccess ? 'Desbloqueo exitoso' : 'No se pudo completar la acción');
+                const title = options.title || (isSuccess ? 'Operación exitosa' : 'No se pudo completar la acción');
                 const message = options.message || '';
                 const username = options.username || '';
 
@@ -296,7 +541,6 @@
                     });
 
                     if (response.status === 404) {
-                        // Endpoint aún no activo (Fase 3 standalone)
                         return;
                     }
 
@@ -310,7 +554,7 @@
                         statusDot.classList.remove('bg-brand-lime');
                         statusDot.classList.add('bg-brand-gold');
                         statusText.textContent = 'Sesión sin permisos (' + (data && data.user ? data.user : 'No autorizado') + ')';
-                        sessionAlertText.textContent = data.message || 'Acceso restringido: su cuenta no pertenece al grupo autorizado para desbloqueo.';
+                        sessionAlertText.textContent = data.message || 'Acceso restringido: su cuenta no pertenece al grupo autorizado para soporte.';
                         sessionAlert.classList.remove('hidden');
                         usernameInput.disabled = true;
                         updateButtonState();
@@ -323,8 +567,12 @@
             }
 
             usernameInput.addEventListener('input', updateButtonState);
+            newPasswordInput.addEventListener('input', updatePasswordModalButtonState);
+            confirmPasswordInput.addEventListener('input', updatePasswordModalButtonState);
 
             closeModalBtn.addEventListener('click', hideModal);
+            cancelPasswordModalBtn.addEventListener('click', closePasswordModal);
+            closePasswordModalX.addEventListener('click', closePasswordModal);
 
             resultModal.addEventListener('click', function (event) {
                 if (event.target === resultModal) {
@@ -332,12 +580,23 @@
                 }
             });
 
-            document.addEventListener('keydown', function (event) {
-                if (event.key === 'Escape' && !resultModal.classList.contains('hidden')) {
-                    hideModal();
+            passwordModal.addEventListener('click', function (event) {
+                if (event.target === passwordModal && !isResetSubmitting) {
+                    closePasswordModal();
                 }
             });
 
+            document.addEventListener('keydown', function (event) {
+                if (event.key === 'Escape') {
+                    if (!resultModal.classList.contains('hidden')) {
+                        hideModal();
+                    } else if (!passwordModal.classList.contains('hidden') && !isResetSubmitting) {
+                        closePasswordModal();
+                    }
+                }
+            });
+
+            // Accion 1 (Izquierda): Desbloquear Usuario
             form.addEventListener('submit', async function (event) {
                 event.preventDefault();
 
@@ -346,7 +605,7 @@
                     return;
                 }
 
-                setSubmittingState(true);
+                setSubmittingState(true, 'unlock');
 
                 try {
                     const response = await fetch('/api/unlock', {
@@ -395,11 +654,140 @@
                         message: 'No se pudo establecer comunicación con el servicio local de PowerShell.'
                     });
                 } finally {
-                    setSubmittingState(false);
+                    setSubmittingState(false, '');
+                }
+            });
+
+            // Accion 2 (Derecha): Validar estado en AD y abrir Modal de Cambiar Contrasena
+            openPasswordModalBtn.addEventListener('click', async function () {
+                const username = usernameInput.value.trim().toLowerCase();
+                if (!isValidUsername(username) || !isSessionAuthorized || isSubmitting) {
+                    return;
+                }
+
+                setSubmittingState(true, 'check-status');
+
+                try {
+                    const response = await fetch('/api/user-status', {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json',
+                            'Accept': 'application/json'
+                        },
+                        body: JSON.stringify({ username: username })
+                    });
+
+                    let payload = null;
+                    const contentType = response.headers.get('content-type') || '';
+                    if (contentType.indexOf('application/json') !== -1) {
+                        payload = await response.json();
+                    }
+
+                    const badgeLabel = (payload && payload.user && payload.user.displayName)
+                        ? username + ' (' + payload.user.displayName + ')'
+                        : username;
+
+                    if (response.ok && payload && payload.success && payload.user) {
+                        openPasswordModal(payload.user);
+                    } else {
+                        const errorMsg = (payload && payload.message)
+                            ? payload.message
+                            : 'No fue posible validar la cuenta en el servidor (HTTP ' + response.status + ').';
+                        showModal({
+                            success: false,
+                            title: (payload && payload.title) ? payload.title : 'No se puede cambiar la contraseña',
+                            username: badgeLabel,
+                            message: errorMsg
+                        });
+                    }
+                } catch (_error) {
+                    showModal({
+                        success: false,
+                        title: 'Error de conexión',
+                        username: username,
+                        message: 'No se pudo establecer comunicación con el servicio local de PowerShell.'
+                    });
+                } finally {
+                    setSubmittingState(false, '');
+                }
+            });
+
+            // Envio del Modal de Restablecimiento de Contrasena
+            passwordResetForm.addEventListener('submit', async function (event) {
+                event.preventDefault();
+
+                const newPassword = newPasswordInput.value;
+                const confirmPassword = confirmPasswordInput.value;
+
+                if (!activeTargetUser || newPassword.length === 0 || newPassword !== confirmPassword || isResetSubmitting) {
+                    return;
+                }
+
+                setResetSubmittingState(true);
+
+                try {
+                    const response = await fetch('/api/reset-password', {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json',
+                            'Accept': 'application/json'
+                        },
+                        body: JSON.stringify({
+                            username: activeTargetUser,
+                            newPassword: newPassword,
+                            confirmPassword: confirmPassword,
+                            changePasswordAtLogon: Boolean(changeAtLogonCheckbox.checked),
+                            unlockAccount: Boolean(unlockAccountCheckbox.checked)
+                        })
+                    });
+
+                    let payload = null;
+                    const contentType = response.headers.get('content-type') || '';
+                    if (contentType.indexOf('application/json') !== -1) {
+                        payload = await response.json();
+                    }
+
+                    const targetLabel = (payload && payload.user && payload.user.displayName)
+                        ? activeTargetUser + ' (' + payload.user.displayName + ')'
+                        : activeTargetUser;
+
+                    closePasswordModal();
+
+                    if (response.ok && payload && payload.success) {
+                        showModal({
+                            success: true,
+                            title: payload.title || 'Cambio de contraseña exitoso',
+                            username: targetLabel,
+                            message: payload.message || 'La contraseña del usuario ha sido restablecida correctamente.'
+                        });
+                        usernameInput.value = '';
+                        updateButtonState();
+                    } else {
+                        const errorMsg = (payload && payload.message)
+                            ? payload.message
+                            : 'No fue posible restablecer la contraseña (HTTP ' + response.status + ').';
+                        showModal({
+                            success: false,
+                            title: (payload && payload.title) ? payload.title : 'Error al cambiar contraseña',
+                            username: targetLabel,
+                            message: errorMsg
+                        });
+                    }
+                } catch (_error) {
+                    closePasswordModal();
+                    showModal({
+                        success: false,
+                        title: 'Error de conexión',
+                        username: activeTargetUser,
+                        message: 'No se pudo establecer comunicación con el servicio local de PowerShell.'
+                    });
+                } finally {
+                    setResetSubmittingState(false);
                 }
             });
 
             updateButtonState();
+            updatePasswordModalButtonState();
             checkSession();
         })();
     </script>
