@@ -1,4 +1,4 @@
-# Plan de Ejecucion del Proyecto: Desbloqueo y Gestion de Usuarios
+# Plan de Ejecucion del Proyecto: Gestion de Usuarios de Dominio
 
 ## Estructura de Directorios Propuesta
 
@@ -14,7 +14,7 @@ DesbloqueoUsuarios/
 │   └── index.html             # Interfaz de usuario anonima (HTML5, Tailwind CSS CDN y Vanilla JS)
 ├── scripts/
 │   ├── server.ps1             # Servidor HTTP nativo con System.Net.HttpListener
-│   └── ad-service.ps1         # Logica de Active Directory (validacion de grupo, consulta, desbloqueo y cambio de clave)
+│   └── ad-service.ps1         # Logica de Active Directory (desbloqueo, cambio de clave e inhabilitacion masiva)
 └── tests/
     └── backend.Tests.ps1      # Pruebas automatizadas de funciones AD y endpoints HTTP
 ```
@@ -58,29 +58,12 @@ Configurar el encarpetado del proyecto y escribir el esqueleto inicial del servi
 
 Construir la interfaz visual en `public/index.html` siguiendo fielmente el diseno de muestra de `demoView.jpg`, manteniendo la web anonima (sin nombre de compania ni logo), aplicando la paleta de colores con Tailwind CSS (via CDN) y el flujo de un solo paso en Vanilla JavaScript.
 
-### Especificacion de Estilo Visual (basada en `demoView.jpg`)
-- **Barra Superior (Navbar):** Franja horizontal de ancho completo en Azul Marino Oscuro (`#032147`) con el texto `"Mesa de Ayuda - Gestion de Usuarios"` alineado a la derecha en tono claro.
-- **Fondo Principal:** Fondo gris claro con patron geometrico poligonal sutil (SVG low-poly de fondo) que centra vertical y horizontalmente la tarjeta principal.
-- **Tarjeta Central (Card):**
-  - Contenedor blanco centrado con bordes redondeados (`rounded-2xl`) y sombra suave (`shadow-xl`).
-  - **Borde superior acentuado:** Linea decorativa superior en Amarillo/Naranja (`#FDC90A` / `#FFDF80`) con detalle segmentado en el extremo derecho, tal como se aprecia en `demoView.jpg`.
-  - **Titulo principal:** `"Desbloqueo de Usuarios de Dominio"` centrado, en negrita y color Azul Marino Oscuro (`#032147`).
-  - **Subtitulo:** `"Ingrese el usuario de red del colaborador para realizar el desbloqueo en el Active Directory."` centrado en Texto Gris (`#888888`).
-  - **Campo de entrada (Input):** Bordes totalmente redondeados (`rounded-full`), contenedor izquierdo sutil con icono SVG de usuario en linea fina, y campo de texto con placeholder `"nombre.apellido"`.
-  - **Boton de accion:** Bordes totalmente redondeados (`rounded-full`), ancho completo, fondo Verde Secundario (`#208342`), icono SVG de candado en linea fina junto al texto `"Desbloquear Usuario"`. Permanece deshabilitado hasta ingresar un usuario valido.
-  - **Nota inferior dentro de la tarjeta:** Texto centrado `"Solo se procesaran cuentas habilitadas."`
-- **Indicador de Estado Inferior (fuera de la tarjeta):** Punto circular en Verde Primario (`#97C03C`) junto al texto de estado de conexion al dominio (anonimo, ej. `"Conectado al Dominio"` junto al usuario de soporte en sesion).
-
 ### Lista de verificacion
 - [x] 3.1. Estructurar `public/index.html` con Tailwind CSS via CDN replicando la maquetacion y proporciones de `demoView.jpg` con la paleta de colores definida (`#032147`, `#208342`, `#97C03C`, `#FDC90A`, `#FFDF80`, `#888888`).
 - [x] 3.2. Incorporar la barra superior en `#032147`, el fondo geometrico sutil, la tarjeta con linea superior amarilla segmentada y el indicador inferior de estado de conexion.
 - [x] 3.3. Crear el formulario de un solo paso con el campo redondeado `nombre.apellido` (con icono SVG de usuario) y el boton redondeado `Desbloquear Usuario` (con icono SVG de candado).
 - [x] 3.4. Implementar validacion en Vanilla JS: mantener el boton "Desbloquear Usuario" deshabilitado hasta que se ingrese un formato valido de usuario.
 - [x] 3.5. Construir el componente modal de notificacion (armonizado con el estilo de `demoView.jpg`) para mostrar "Desbloqueo exitoso" o el detalle del "Error" retornado por el servidor.
-
-### Pruebas y Criterios de Exito
-- **Prueba:** Inspeccion visual comparativa contra `demoView.jpg` y prueba funcional de `public/index.html` validando campo vacio, texto con formato valido e interaccion con el modal.
-- **Criterio de exito:** La interfaz reproduce fielmente el diseno de `demoView.jpg`, es anonima, no contiene emojis, el boton solo se habilita al ingresar un usuario valido y muestra el modal correctamente.
 
 ---
 
@@ -94,10 +77,6 @@ Validar la identidad del analista a partir del contexto de la sesion de Windows 
 - [x] 4.3. Bloquear la ejecucion de acciones (HTTP 403 Forbidden) si el usuario en sesion no pertenece al grupo autorizado, e informar en la interfaz que no cuenta con permisos.
 - [x] 4.4. Exponer el endpoint `GET /api/session` para que el frontend consulte el usuario actual y su estado de autorizacion al cargar la pagina.
 
-### Pruebas y Criterios de Exito
-- **Prueba:** Consultar `GET /api/session` y probar la funcion de autorizacion tanto para miembros del grupo autorizado como para usuarios sin permisos.
-- **Criterio de exito:** Usuarios autorizados visualizan la interfaz habilitada con su cuenta de dominio; usuarios no autorizados reciben HTTP 403 y el formulario permanece bloqueado con aviso de permisos insuficientes.
-
 ---
 
 ## Parte 5: Integracion con Active Directory (Comandos Nativos)
@@ -107,15 +86,7 @@ Estructurar las funciones nativas del modulo `ActiveDirectory` en `scripts/ad-se
 ### Lista de verificacion
 - [x] 5.1. Validar disponibilidad e importacion del modulo `ActiveDirectory` (`Import-Module ActiveDirectory`).
 - [x] 5.2. Implementar la consulta del usuario con `Get-ADUser -Identity <usuario> -Properties LockedOut, Enabled, DisplayName`.
-- [x] 5.3. Implementar la regla de negocio estricta en `Invoke-UserUnlock`:
-  - Si el usuario no existe en AD: retornar error indicando que la cuenta no fue encontrada.
-  - Si `Enabled -eq $false` (Inhabilitado): NO ejecutar desbloqueo y retornar error indicando que la cuenta esta INHABILITADA.
-  - Si `Enabled -eq $true` y `LockedOut -eq $false`: retornar aviso indicando que la cuenta esta habilitada pero no se encuentra bloqueada.
-  - Si `Enabled -eq $true` y `LockedOut -eq $true`: ejecutar `Unlock-ADAccount -Identity <usuario>` y retornar confirmacion de "Desbloqueo exitoso".
-
-### Pruebas y Criterios de Exito
-- **Prueba:** Pruebas unitarias en `tests/backend.Tests.ps1` para los 4 escenarios (usuario inexistente, usuario inhabilitado, usuario habilitado no bloqueado, usuario habilitado y bloqueado).
-- **Criterio de exito:** `Unlock-ADAccount` se ejecuta unica y exclusivamente cuando `Enabled` es verdadero y `LockedOut` es verdadero.
+- [x] 5.3. Implementar la regla de negocio estricta en `Invoke-UserUnlock`.
 
 ---
 
@@ -124,17 +95,10 @@ Estructurar las funciones nativas del modulo `ActiveDirectory` en `scripts/ad-se
 Completar `scripts/server.ps1` integrando `scripts/ad-service.ps1` para escuchar las peticiones del frontend y responder en formato JSON estandarizado.
 
 ### Lista de verificacion
-- [x] 6.1. Implementar enrutador HTTP en `scripts/server.ps1` para:
-  - `GET /` (entrega de `public/index.html`).
-  - `GET /api/session` (datos del analista en sesion y estado de autorizacion).
-  - `POST /api/unlock` (recibe `{ "username": "nombre.apellido" }`, valida estado y ejecuta desbloqueo).
+- [x] 6.1. Implementar enrutador HTTP en `scripts/server.ps1` para `GET /`, `GET /api/session` y `POST /api/unlock`.
 - [x] 6.2. Sanitizar y validar el formato del `username` en el backend antes de invocar cmdlets de AD.
-- [x] 6.3. Estandarizar respuestas JSON (`{ success: bool, code: string, message: string, user: object }`) con codigos HTTP apropiados (200, 400, 403, 404, 422, 500).
+- [x] 6.3. Estandarizar respuestas JSON con codigos HTTP apropiados (200, 400, 403, 404, 422, 500).
 - [x] 6.4. Escribir y ejecutar `tests/backend.Tests.ps1` para validar la logica del backend, el control de acceso y las reglas de negocio.
-
-### Pruebas y Criterios de Exito
-- **Prueba:** Ejecucion de `tests/backend.Tests.ps1` e invocacion de los endpoints con `Invoke-RestMethod`.
-- **Criterio de exito:** Todas las pruebas pasan, las conexiones HTTP se cierran correctamente en bloques `finally` y las respuestas JSON son consistentes.
 
 ---
 
@@ -145,12 +109,8 @@ Conectar el frontend con la API del backend para completar el flujo de extremo a
 ### Lista de verificacion
 - [x] 7.1. Conectar la carga inicial de `public/index.html` con `GET /api/session` y el envio del formulario con `POST /api/unlock` mediante `fetch()`.
 - [x] 7.2. Manejar estados de carga en el boton ("Procesando...") para evitar envios duplicados.
-- [x] 7.3. Mostrar en el modal el resultado exacto devuelto por el backend ("Desbloqueo exitoso" o detalle del error) y limpiar el campo tras un desbloqueo exitoso.
+- [x] 7.3. Mostrar en el modal el resultado exacto devuelto por el backend y limpiar el campo tras un desbloqueo exitoso.
 - [x] 7.4. Realizar pruebas integrales de extremo a extremo (E2E) verificando el funcionamiento completo.
-
-### Pruebas y Criterios de Exito
-- **Prueba:** Flujo completo de principio a fin probando los escenarios de negocio y verificando el renderizado de la interfaz y respuestas del servidor.
-- **Criterio de exito:** La aplicacion opera de principio a fin sin dependencias externas, cumpliendo todas las reglas de `AGENTS.md` y `PLAN.md`.
 
 ---
 ---
@@ -163,86 +123,162 @@ Conectar el frontend con la API del backend para completar el flujo de extremo a
 
 ## Parte 8: Planificacion de la Fase 2 (Cambio de Contrasena)
 
-Definir la arquitectura funcional, reglas de validacion y plan de trabajo para incorporar el restablecimiento de contrasenas desde la interfaz web.
-
 ### Lista de verificacion
 - [x] 8.1. Analizar requerimientos de interfaz (botones 50/50, modal inspirado en la ventana nativa de AD) y comandos de Active Directory (`Set-ADAccountPassword`, `Set-ADUser -ChangePasswordAtLogon`, `Unlock-ADAccount`).
-- [x] 8.2. Resolver preguntas abiertas con el usuario (validacion previa en AD al pulsar "Cambiar Contrasena", validacion de coincidencia de campos en el modal, boton "Aceptar" deshabilitado hasta coincidencia y estado inicial de los checkboxes).
+- [x] 8.2. Resolver preguntas abiertas con el usuario.
 - [x] 8.3. Actualizar `AGENTS.md` y `docs/PLAN.md` con las especificaciones y fases detalladas (Partes 8 a 11).
 - [x] 8.4. Obtener aprobacion del usuario para iniciar la Parte 9.
-
-### Pruebas y Criterios de Exito
-- **Prueba:** Revision del plan actualizado en `docs/PLAN.md` y `AGENTS.md` por parte del usuario.
-- **Criterio de exito:** El usuario aprueba formalmente el plan de la Fase 2 para comenzar con la Parte 9.
 
 ---
 
 ## Parte 9: Logica de Active Directory y Endpoints Backend para Cambio de Contrasena
 
-Implementar en `scripts/ad-service.ps1` y `scripts/server.ps1` la consulta previa de estado del usuario y la ejecucion del cambio de contrasena junto con sus opciones en Active Directory.
-
 ### Lista de verificacion
-- [x] 9.1. Implementar en `scripts/ad-service.ps1` la funcion `Invoke-UserStatusCheck` para validar que el usuario ingresado exista y este **HABILITADO** (`Enabled = $true`), retornando su `DisplayName` y estado actual de bloqueo (`LockedOut`) para mostrarlo en el modal de contrasena. Si no existe (`HTTP 404`) o esta **INHABILITADO** (`HTTP 422`), rechazar la apertura del modal.
-- [x] 9.2. Implementar en `scripts/ad-service.ps1` la funcion `Invoke-UserPasswordReset` con las siguientes reglas:
-  - Validar formato de `username`, que `newPassword` y `confirmPassword` no esten vacios y que sean identicos (`HTTP 400` en caso contrario).
-  - Consultar el usuario en AD y verificar que exista (`HTTP 404`) y este **HABILITADO** (`Enabled = $true`; si es `$false`, retornar `HTTP 422 ACCOUNT_DISABLED` sin modificar nada).
-  - Convertir la contrasena a `SecureString` (`ConvertTo-SecureString -AsPlainText -Force`) y ejecutar `Set-ADAccountPassword -Identity <usuario> -Reset -NewPassword <SecureString> -ErrorAction Stop`.
-  - Ejecutar `Set-ADUser -Identity <usuario> -ChangePasswordAtLogon <bool> -ErrorAction Stop` segun el valor del primer checkbox.
-  - Si el segundo checkbox (`unlockAccount`) fue marcado como `$true`, ejecutar `Unlock-ADAccount -Identity <usuario> -ErrorAction Stop`.
-- [x] 9.3. Implementar los controladores HTTP `Invoke-UserStatusApiController` y `Invoke-PasswordResetApiController` en `scripts/ad-service.ps1`, y registrar en `scripts/server.ps1` las rutas:
-  - `POST /api/user-status`
-  - `POST /api/reset-password`
-- [x] 9.4. Ampliar las pruebas unitarias en `tests/backend.Tests.ps1` (con mocks inyectados) para validar todos los escenarios de `Invoke-UserStatusCheck` e `Invoke-UserPasswordReset` (contrasenas distintas, cuenta inexistente, cuenta inhabilitada, cambio exitoso con `ChangePasswordAtLogon` y desbloqueo simultaneo).
-
-### Pruebas y Criterios de Exito
-- **Prueba:** Ejecucion de las pruebas unitarias en `tests/backend.Tests.ps1`.
-- **Criterio de exito:** Todas las pruebas unitarias pasan, garantizando que nunca se cambie la contrasena de una cuenta inhabilitada y que los parametros `ChangePasswordAtLogon` y `Unlock-ADAccount` se apliquen segun lo indicado.
+- [x] 9.1. Implementar en `scripts/ad-service.ps1` la funcion `Invoke-UserStatusCheck`.
+- [x] 9.2. Implementar en `scripts/ad-service.ps1` la funcion `Invoke-UserPasswordReset`.
+- [x] 9.3. Implementar los controladores HTTP `Invoke-UserStatusApiController` y `Invoke-PasswordResetApiController` en `scripts/ad-service.ps1`, y registrar en `scripts/server.ps1` las rutas `POST /api/user-status` y `POST /api/reset-password`.
+- [x] 9.4. Ampliar las pruebas unitarias en `tests/backend.Tests.ps1`.
 
 ---
 
 ## Parte 10: Frontend (Botones 50/50 y Modal "Restablecer contrasena")
 
-Actualizar `public/index.html` para incorporar la disposicion de botones 50/50 y el nuevo modal de cambio de contrasena basado en el dialogo nativo de Active Directory.
-
 ### Lista de verificacion
-- [x] 10.1. Ajustar el contenedor de acciones del formulario principal en `public/index.html` para dividir el espacio en dos columnas iguales (50/50):
-  - Izquierda: Boton `"Desbloquear Usuario"` en Verde Secundario (`#208342`).
-  - Derecha: Boton `"Cambiar Contrasena"` en Verde Oscuro diferenciador (`#14532A`, hover `#0F3F20`) con icono SVG de llave/candado en linea fina.
-  - Ambos botones permanecen deshabilitados hasta ingresar un usuario con formato `nombre.apellido` valido.
-- [x] 10.2. Construir en `public/index.html` el modal `"Restablecer contrasena"` armonizado con la paleta del proyecto e incluyendo todos los elementos de la ventana nativa de AD:
-  - Encabezado con titulo `"Restablecer contrasena"`, badge del usuario seleccionado y boton de cierre (`X`).
-  - Campo `"Contrasena nueva:"` (`type="password"`).
-  - Campo `"Confirmar contrasena:"` (`type="password"`).
-  - Checkbox 1 (**marcado por defecto**): `"El usuario debe cambiar la contrasena en el siguiente inicio de sesion"` + texto secundario indentado: `"El usuario ha de cerrar la sesion y volver a abrirla para que los cambios tengan efecto."`
-  - Etiqueta de estado: `"Estado de bloqueo de cuenta en este controlador de dominio: Desbloqueado / Bloqueado"`.
-  - Checkbox 2 (**desmarcado por defecto**): `"Desbloquear la cuenta del usuario"`.
-  - Botones inferiores alineados a la derecha: `"Aceptar"` y `"Cancelar"`.
-- [x] 10.3. Implementar validacion en Vanilla JS para los campos del modal de contrasena:
-  - Mantener el boton `"Aceptar"` deshabilitado mientras alguno de los dos campos este vacio o las contrasenas no coincidan.
-  - Mostrar un aviso en linea dentro del modal cuando ambos campos tengan texto pero no coincidan.
-
-### Pruebas y Criterios de Exito
-- **Prueba:** Verificacion estructural y funcional de `public/index.html` (botones 50/50, apertura/cierre del modal, estado por defecto de los checkboxes y bloqueo del boton `"Aceptar"` ante campos vacios o distintos).
-- **Criterio de exito:** La interfaz respeta el diseno 50/50, el modal replica los controles nativos de AD con el estilo visual del proyecto, no contiene emojis y valida correctamente la coincidencia de contrasenas.
+- [x] 10.1. Ajustar el contenedor de acciones del formulario principal en `public/index.html` para dividir el espacio en dos columnas iguales (50/50).
+- [x] 10.2. Construir en `public/index.html` el modal `"Restablecer contrasena"` armonizado con la paleta del proyecto e incluyendo todos los elementos de la ventana nativa de AD.
+- [x] 10.3. Implementar validacion en Vanilla JS para los campos del modal de contrasena.
 
 ---
 
 ## Parte 11: Integracion Frontend + Backend y Pruebas E2E con `henkia.pruebas`
 
-Conectar el flujo completo del frontend con los nuevos endpoints del backend y ejecutar las pruebas integrales en vivo utilizando exclusivamente la cuenta `henkia.pruebas`.
+### Lista de verificacion
+- [x] 11.1. Conectar el clic en `"Cambiar Contrasena"` con `POST /api/user-status`.
+- [x] 11.2. Conectar el envio del modal `"Restablecer contrasena"` (boton `"Aceptar"`) con `POST /api/reset-password`.
+- [x] 11.3. Actualizar la seccion `-IncludeLiveHttpTests` de `tests/backend.Tests.ps1` para que TODAS las pruebas en vivo utilicen **UNICA Y EXCLUSIVAMENTE** la cuenta `henkia.pruebas`.
+
+---
+---
+
+# Fase 3: Integracion del Modulo de Inhabilitacion Masiva de Usuarios por CSV
+
+> **Nota de Arquitectura y Pruebas:** El motor de Active Directory en `scripts/ad-service.ps1` debe contener unicamente la logica pura de negocio (sin `OpenFileDialog`, sin `Out-GridView`, sin auto-reversion y sin bloqueo harcodeado de `henkia.pruebas`). Para las pruebas automatizadas en vivo (`tests/backend.Tests.ps1 -IncludeLiveHttpTests`), se seguira utilizando **UNICA Y EXCLUSIVAMENTE** la cuenta `henkia.pruebas` (revirtiendo su estado al finalizar el test).
+
+---
+
+## Parte 12: Planificacion y Documentacion de la Fase 3 (Inhabilitacion Masiva)
+
+Analizar el script aislado `Test-Inhabilitaciones.ps1`, definir la arquitectura web de 2 pasos (`preview` y `execute`) y actualizar la documentacion del proyecto.
 
 ### Lista de verificacion
-- [x] 11.1. Conectar el clic en `"Cambiar Contrasena"` con `POST /api/user-status`:
-  - Mostrar estado de carga mientras se valida el usuario en AD.
-  - Si el usuario no existe o esta inhabilitado, mostrar el modal de notificacion con el error correspondiente.
-  - Si el usuario existe y esta habilitado, limpiar los campos del modal de contrasena, restablecer los checkboxes a sus valores por defecto, actualizar el texto `"Estado de bloqueo de cuenta en este controlador de dominio: Bloqueado / Desbloqueado"` y abrir el modal `"Restablecer contrasena"`.
-- [x] 11.2. Conectar el envio del modal `"Restablecer contrasena"` (boton `"Aceptar"`) con `POST /api/reset-password`:
-  - Enviar `{ username, newPassword, confirmPassword, changePasswordAtLogon, unlockAccount }`.
-  - Al finalizar, cerrar el modal de contrasena y abrir el modal de notificacion confirmando el `"Cambio de contrasena exitoso"` o detallando el error devuelto por Active Directory (ej. politicas de complejidad).
-- [x] 11.3. Actualizar la seccion `-IncludeLiveHttpTests` de `tests/backend.Tests.ps1` para que TODAS las pruebas en vivo utilicen **UNICA Y EXCLUSIVAMENTE** la cuenta `henkia.pruebas`, probando:
-  - Consulta de estado (`POST /api/user-status`) para `henkia.pruebas`.
-  - Cambio de contrasena, asignacion de `ChangePasswordAtLogon` y desbloqueo simultaneo (`POST /api/reset-password`) sobre `henkia.pruebas`.
+- [x] 12.1. Revisar `Test-Inhabilitaciones.ps1` y sus documentos asociados para extraer las reglas validadas de `Vacaciones` y `Paz y Salvo`.
+- [x] 12.2. Resolver preguntas de diseno con el usuario (navegacion por pestanas Segmented Control, envio de CSV en JSON, checkboxes desmarcados por defecto en el modal de verificacion y limpieza de carpeta temporal al finalizar).
+- [x] 12.3. Actualizar `AGENTS.md` y `docs/PLAN.md` con el plan detallado de las Partes 12 a 15.
+- [x] 12.4. Obtener aprobacion del usuario para iniciar la Parte 13.
 
 ### Pruebas y Criterios de Exito
-- **Prueba:** Ejecucion completa de `tests/backend.Tests.ps1 -IncludeLiveHttpTests` operando exclusivamente sobre `henkia.pruebas`.
-- **Criterio de exito:** Todas las pruebas unitarias y E2E en vivo aprueban sin errores, respetando estrictamente la restriccion de usar solo `henkia.pruebas`.
+- **Prueba:** Revision de `AGENTS.md` y `docs/PLAN.md` por parte del usuario.
+- **Criterio de exito:** El usuario aprueba iniciar la Parte 13.
+
+---
+
+## Parte 13: Motor de Active Directory y Endpoints Backend (`POST /api/masivo/preview` y `POST /api/masivo/execute`)
+
+Migrar el motor puro de Active Directory desde `Test-Inhabilitaciones.ps1` hacia `scripts/ad-service.ps1` y exponer los dos nuevos endpoints en `scripts/server.ps1`.
+
+### Lista de verificacion
+- [x] 13.1. Implementar en `scripts/ad-service.ps1` la funcion `Invoke-BulkDisablePreview`:
+  - Recibir el texto del archivo CSV (`CsvContent`).
+  - Validar que no este vacio, detectar automaticamente el delimitador (`;` o `,`) en la primera linea y parsear los registros con `ConvertFrom-Csv`.
+  - **Normalizacion critica de encabezados:** Aplicar `.Trim().ToUpperInvariant()` a los nombres de las propiedades de cada fila para tolerar espacios adicionales o minusculas (`"NOMBRE "`, `" NOMBRE"`, `" APELLIDO"`, `"APELLIDO "`, `"nombre"`, `"apellido"`). Validar que existan ambas columnas (`HTTP 400` si faltan).
+  - Por cada fila con nombre o apellido no vacios, buscar en Active Directory cuentas activas (`Enabled -eq $true`):
+    - Busqueda principal: `Enabled -eq $true -and GivenName -like "*$Nombre*" -and Surname -like "*$Apellido*"`.
+    - Busqueda de respaldo: `Enabled -eq $true -and (Name -like "*$Nombre*$Apellido*" -or DisplayName -like "*$Nombre*$Apellido*" -or SamAccountName -like "*$Nombre*$Apellido*")`.
+  - Omitir duplicados y retornar la lista de usuarios activos encontrados (`nombre`, `apellido`, `usuario`, `estado`, `descripcion`) junto con la lista de filas del CSV que no arrojaron coincidencias activas (`unmatchedRows`).
+- [x] 13.2. Implementar en `scripts/ad-service.ps1` la funcion `Invoke-BulkDisableExecute`:
+  - Recibir el tipo de proceso (`ProcessType`: `'Vacaciones'` o `'Paz y Salvo'`) y el arreglo de nombres de usuario confirmados (`Usernames`).
+  - Por cada usuario seleccionado, consultar su estado actual en AD (`Get-ADUser -Identity <usuario> -Properties Enabled, Description, DistinguishedName, DisplayName`) y aplicar las reglas puras de negocio:
+    - **Si es `'Vacaciones'`:** Ejecutar `Disable-ADAccount -Identity <usuario> -ErrorAction Stop`.
+    - **Si es `'Paz y Salvo'`:**
+      1. Ejecutar `Disable-ADAccount -Identity <usuario> -ErrorAction Stop`.
+      2. Calcular la nueva descripcion anteponiendo `"(R) "` a la descripcion actual (sin duplicar si ya inicia con `(R)`) y ejecutar `Set-ADUser -Identity <usuario> -Description $NuevaDescripcion -ErrorAction Stop`.
+      3. Mover el objeto en AD a la OU `OU=AL_INACTIVOS,OU=USUARIOS,OU=E_ALIAR,DC=aliar,DC=com,DC=co` mediante `Move-ADObject -Identity <DistinguishedName> -TargetPath $OUInactivos -ErrorAction Stop`.
+  - Retornar un resumen detallado con el total de cuentas procesadas exitosamente y el detalle por cada usuario.
+- [x] 13.3. Implementar los controladores `Invoke-BulkPreviewApiController` e `Invoke-BulkExecuteApiController` en `scripts/ad-service.ps1` (validando sesion autorizada `HTTP 403`) y registrar en `scripts/server.ps1` las rutas:
+  - `POST /api/masivo/preview`
+  - `POST /api/masivo/execute`
+- [x] 13.4. Agregar pruebas unitarias en `tests/backend.Tests.ps1` para validar:
+  - Limpieza de encabezados CSV con espacios y minusculas (`" nombre "`, `"APELLIDO "` con delimitador `,` y `;`).
+  - Filtrado de cuentas ya inhabilitadas en `Invoke-BulkDisablePreview`.
+  - Regla de negocio `Vacaciones` (solo llama a `Disable-ADAccount`).
+  - Regla de negocio `Paz y Salvo` (llama a `Disable-ADAccount`, `Set-ADUser -Description "(R) ..."` y `Move-ADObject` hacia `AL_INACTIVOS`).
+
+### Pruebas y Criterios de Exito
+- **Prueba:** Ejecucion de las pruebas unitarias en `tests/backend.Tests.ps1`.
+- **Criterio de exito:** Todas las pruebas unitarias aprueban validando el parseo tolerante del CSV y la bifurcacion exacta entre `Vacaciones` y `Paz y Salvo`.
+
+---
+
+## Parte 14: Frontend (Navegacion por Pestanas, Vista de Inhabilitacion Masiva y Modal de Verificacion)
+
+Actualizar `public/index.html` para incorporar el selector de modulo al inicio, la vista de carga de CSV y el Modal de Verificacion con checkboxes.
+
+### Lista de verificacion
+- [x] 14.1. Incorporar en la tarjeta principal de `public/index.html` un selector superior tipo pestanas (Segmented Control) que permita elegir que desea hacer el analista:
+  - Pestana 1: `"Desbloqueo / Contraseña"` (muestra la vista individual actual).
+  - Pestana 2: `"Inhabilitación Masiva"` (muestra la nueva vista por lotes CSV).
+- [x] 14.2. Construir la vista `"Inhabilitación Masiva"` dentro de la tarjeta principal:
+  - Selector `<select id="bulkProcessSelect">` con las opciones `"Vacaciones"` y `"Paz y Salvo"` (mostrando una breve nota dinamica de lo que hace cada proceso).
+  - Selector de archivo `<input type="file" id="bulkCsvInput" accept=".csv">` estilizado con la paleta del proyecto.
+  - Boton `"Analizar Archivo"` (`#analyzeCsvBtn`), habilitado cuando se haya seleccionado un archivo `.csv`.
+- [x] 14.3. Construir el **Modal de Verificacion Masiva** (`#bulkVerifyModal`, reemplazo web de `Out-GridView`):
+  - Encabezado mostrando el tipo de proceso seleccionado (`Vacaciones` o `Paz y Salvo`) y el conteo de cuentas encontradas.
+  - Casilla superior `"Seleccionar todos"` y contador dinamico de usuarios seleccionados (`"X de Y seleccionados"`).
+  - Tabla con scroll vertical mostrando las columnas: **Check**, **Nombre**, **Apellido**, **Usuario**, **Estado** y **Descripción**. Todos los checkboxes individuales inician **desmarcados por defecto**.
+  - Seccion informativa opcional (visible cuando existan filas del CSV sin coincidencia activa en AD) listando los nombres no encontrados o ya inactivos.
+  - Boton `"Ejecutar"` (habilitado solo cuando al menos un checkbox este marcado) y boton `"Cancelar"`.
+
+### Pruebas y Criterios de Exito
+- **Prueba:** Verificacion estructural y funcional de `public/index.html` (cambio de pestana entre vistas, controles de proceso y archivo `.csv`, tabla del modal de verificacion y checkboxes desmarcados por defecto).
+- **Criterio de exito:** La interfaz alterna limpiamente entre ambos modulos, mantiene el diseno corporativo anonimo sin emojis y habilita `"Ejecutar"` solo al seleccionar al menos un usuario en el modal.
+
+---
+
+## Parte 15: Integracion E2E, Pruebas en Vivo con `henkia.pruebas` y Limpieza Final
+
+Conectar el flujo completo entre el frontend y los endpoints masivos, ejecutar las pruebas E2E en vivo exclusivamente con `henkia.pruebas` (con reversion en el test) y limpiar la carpeta temporal `InhabilitarUsuarios/`.
+
+### Lista de verificacion
+- [x] 15.1. Conectar en `public/index.html` el boton `"Analizar Archivo"`: leer el contenido del `.csv` con `file.text()`, enviarlo a `POST /api/masivo/preview` y poblar el Modal de Verificacion (o mostrar el modal de aviso si no se encontraron cuentas activas).
+- [x] 15.2. Conectar en `public/index.html` el boton `"Ejecutar"` del Modal de Verificacion: enviar los usuarios marcados con check y el tipo de proceso a `POST /api/masivo/execute`, cerrar el modal de verificacion y mostrar el resumen final en el modal de notificacion.
+- [x] 15.3. Ampliar la seccion `-IncludeLiveHttpTests` de `tests/backend.Tests.ps1` utilizando **UNICA Y EXCLUSIVAMENTE** la cuenta `henkia.pruebas`:
+  - Probar `POST /api/masivo/preview` enviando un CSV con encabezados con espacios (`" nombre , APELLIDO \nhenkia,pruebas"`) y verificar que localice a `henkia.pruebas`.
+  - Probar `POST /api/masivo/execute` con `Vacaciones` sobre `henkia.pruebas`, verificar en AD que `Enabled` sea `$false`, y restaurar a `henkia.pruebas`.
+  - Probar `POST /api/masivo/execute` con `Paz y Salvo` sobre `henkia.pruebas`, verificar en AD que `Enabled` sea `$false`, `Description` inicie con `(R) ` y su OU sea `AL_INACTIVOS`, y ejecutar en el bloque `finally` del test la restauracion completa de `henkia.pruebas` a su OU, descripcion y estado habilitado originales.
+- [x] 15.4. Eliminar la carpeta temporal `InhabilitarUsuarios/` tras verificar que todas las pruebas pasen.
+
+### Pruebas y Criterios de Exito
+- **Prueba:** Ejecucion completa de `tests/backend.Tests.ps1 -IncludeLiveHttpTests` validando todas las pruebas unitarias y E2E en vivo, y verificacion del estado restaurado de `henkia.pruebas` en Active Directory.
+- **Criterio de exito:** 100% de las pruebas aprobadas, `henkia.pruebas` restaurado en su OU y estado activo original, y carpeta temporal `InhabilitarUsuarios/` eliminada.
+
+---
+---
+
+# Fase 4: Flexibilizacion de Formato de Usuario y Soporte Nativo de Archivos XLSX / CSV Multicapa
+
+## Parte 16: Usuarios sin Punto Obligatorio y Lector Inteligente de Archivos CSV / XLSX
+
+Permitir cuentas de dominio con o sin punto (`usuario` o `nombre.apellido`) en toda la aplicacion, e incorporar soporte nativo para archivos `.xlsx` y `.csv` complejos (con encabezados en filas intermedias y columnas duplicadas posteriores).
+
+### Lista de verificacion
+- [x] 16.1. Actualizar `Test-ValidUsernameFormat` en `scripts/ad-service.ps1` y `USERNAME_REGEX` en `public/index.html` para aceptar cualquier nombre de cuenta valido en Active Directory sin espacios (`^[a-zA-Z0-9._-]+$`), soportando tanto `nombre.apellido` como nombres unicos (`usuario`).
+- [x] 16.2. Implementar en `scripts/ad-service.ps1` el extractor inteligente de tablas `Get-NombreApellidoRecordsFromMatrix`, el parser CSV RFC 4180 (`ConvertFrom-CsvToMatrix`, tolerante a celdas multilinea entre comillas) y el lector nativo OpenXML `.xlsx` (`ConvertFrom-XlsxBase64ToSheetsMatrix`, usando `System.IO.Compression.ZipArchive` y `[xml]` sin requerir Excel ni librerias externas):
+  - Escanear las filas hasta localizar automaticamente la primera fila de encabezados que contenga tanto `'NOMBRE'` como `'APELLIDO'` (aplicando `.Trim().ToUpperInvariant()`).
+  - Al recorrer las celdas de esa fila de izquierda a derecha, **detener la lectura de columnas inmediatamente al ubicar `'NOMBRE'` y `'APELLIDO'`**, ignorando todas las columnas a la derecha (evitando fallos por columnas repetidas como `VIATICOS` o `DIAS DE SUSPENSION`).
+  - Extraer unicamente las columnas `NOMBRE` y `APELLIDO` de la tabla principal y detenerse al finalizar los registros de esa tabla.
+- [x] 16.3. Actualizar `Invoke-BulkDisablePreview` e `Invoke-BulkPreviewApiController` en `scripts/ad-service.ps1` y la vista de carga en `public/index.html` (`accept=".csv,.xlsx"`) para admitir tanto texto CSV (`csvContent`) como archivos Excel en Base64 (`xlsxBase64`).
+- [x] 16.4. Actualizar y ejecutar `tests/backend.Tests.ps1` para validar usuarios de un solo nombre (`recepcion`, `soporte`), archivos CSV con encabezados en la fila 5 y columnas duplicadas, y archivos `.xlsx` generados en memoria.
+
+### Pruebas y Criterios de Exito
+- **Prueba:** Ejecucion de `tests/backend.Tests.ps1` validando usuarios sin punto, parseo de CSV multicapa con columnas repetidas y parseo nativo de archivos `.xlsx`.
+- **Criterio de exito:** Todas las pruebas automatizadas aprueban sin errores.

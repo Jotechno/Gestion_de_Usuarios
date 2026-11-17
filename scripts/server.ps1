@@ -118,6 +118,18 @@ try {
                 $timestamp = (Get-Date).ToString('HH:mm:ss')
                 Write-Host "[$timestamp] POST /api/reset-password | Codigo: $($apiResult.body.code) | HTTP $($apiResult.httpStatus)"
                 Send-JsonResponse -Response $response -StatusCode $apiResult.httpStatus -BodyObject $apiResult.body
+            } elseif ($method -eq 'POST' -and $path -eq '/api/masivo/preview') {
+                $rawBody = Read-RequestBody -Request $request
+                $apiResult = Invoke-BulkPreviewApiController -SessionInfo $sessionInfo -RawBody $rawBody
+                $timestamp = (Get-Date).ToString('HH:mm:ss')
+                Write-Host "[$timestamp] POST /api/masivo/preview | Codigo: $($apiResult.body.code) | HTTP $($apiResult.httpStatus)"
+                Send-JsonResponse -Response $response -StatusCode $apiResult.httpStatus -BodyObject $apiResult.body
+            } elseif ($method -eq 'POST' -and $path -eq '/api/masivo/execute') {
+                $rawBody = Read-RequestBody -Request $request
+                $apiResult = Invoke-BulkExecuteApiController -SessionInfo $sessionInfo -RawBody $rawBody
+                $timestamp = (Get-Date).ToString('HH:mm:ss')
+                Write-Host "[$timestamp] POST /api/masivo/execute | Codigo: $($apiResult.body.code) | HTTP $($apiResult.httpStatus)"
+                Send-JsonResponse -Response $response -StatusCode $apiResult.httpStatus -BodyObject $apiResult.body
             } elseif ($path -like '/api/*') {
                 if (-not $sessionInfo.authorized) {
                     Send-JsonResponse -Response $response -StatusCode 403 -BodyObject @{

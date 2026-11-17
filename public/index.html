@@ -50,7 +50,7 @@
     <main class="flex-1 flex flex-col items-center justify-center px-4 py-10">
         
         <!-- Tarjeta Central -->
-        <section class="w-full max-w-[500px] bg-white rounded-xl shadow-[0_14px_34px_rgba(3,33,71,0.10)] overflow-hidden">
+        <section class="w-full max-w-[540px] bg-white rounded-xl shadow-[0_14px_34px_rgba(3,33,71,0.10)] overflow-hidden">
             
             <!-- Linea Superior Acentuada Segmentada -->
             <div class="w-full h-1.5 flex items-center">
@@ -62,81 +62,202 @@
             </div>
 
             <!-- Cuerpo de la Tarjeta -->
-            <div class="px-7 sm:px-9 pt-8 pb-7 text-center">
-                <h1 class="text-xl sm:text-[22px] font-bold text-brand-navy tracking-tight">
-                    Desbloqueo de Usuarios de Dominio
-                </h1>
+            <div class="px-6 sm:px-9 pt-7 pb-7 text-center">
 
-                <p class="mt-3 text-xs sm:text-sm text-brand-muted leading-relaxed max-w-[380px] mx-auto">
-                    Ingrese el usuario de red del colaborador para realizar el desbloqueo o cambio de contraseña en el Active Directory.
-                </p>
+                <!-- Selector Superior de Modulo (Segmented Control) -->
+                <div class="mb-6">
+                    <p class="text-[11px] font-semibold uppercase tracking-wider text-brand-muted mb-2">
+                        Seleccione la operación que desea realizar
+                    </p>
+                    <div
+                        id="moduleTabs"
+                        role="tablist"
+                        aria-label="Selector de módulo de gestión de usuarios"
+                        class="grid grid-cols-2 p-1 rounded-full bg-gray-100 border border-gray-200"
+                    >
+                        <button
+                            type="button"
+                            id="tabIndividualBtn"
+                            role="tab"
+                            aria-selected="true"
+                            aria-controls="viewIndividual"
+                            class="h-9 sm:h-10 px-3 rounded-full text-xs sm:text-sm font-semibold transition-all flex items-center justify-center gap-1.5 bg-brand-navy text-white shadow-sm cursor-pointer"
+                        >
+                            <svg xmlns="http://www.w3.org/2000/svg" class="w-4 h-4 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.8">
+                                <path stroke-linecap="round" stroke-linejoin="round" d="M15.75 6a3.75 3.75 0 11-7.5 0 3.75 3.75 0 017.5 0zM4.501 20.118a7.5 7.5 0 0114.998 0A17.933 17.933 0 0112 21.75c-2.676 0-5.216-.584-7.499-1.632z" />
+                            </svg>
+                            <span>Desbloqueo / Contraseña</span>
+                        </button>
 
-                <!-- Alerta de Permisos de Sesion (Oculta por defecto) -->
-                <div id="sessionAlert" class="hidden mt-4 px-4 py-2.5 rounded-lg bg-brand-lightGold/40 border border-brand-gold text-brand-navy text-xs text-left">
+                        <button
+                            type="button"
+                            id="tabBulkBtn"
+                            role="tab"
+                            aria-selected="false"
+                            aria-controls="viewBulk"
+                            class="h-9 sm:h-10 px-3 rounded-full text-xs sm:text-sm font-semibold transition-all flex items-center justify-center gap-1.5 text-brand-navy hover:bg-gray-200/70 cursor-pointer"
+                        >
+                            <svg xmlns="http://www.w3.org/2000/svg" class="w-4 h-4 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.8">
+                                <path stroke-linecap="round" stroke-linejoin="round" d="M19.5 14.25v-2.625a3.375 3.375 0 00-3.375-3.375h-1.5A1.125 1.125 0 0113.5 7.125v-1.5a3.375 3.375 0 00-3.375-3.375H8.25m0 12.75h7.5m-7.5 3H12M10.5 2.25H5.625c-.621 0-1.125.504-1.125 1.125v17.25c0 .621.504 1.125 1.125 1.125h12.75c.621 0 1.125-.504 1.125-1.125V11.25a9 9 0 00-9-9z" />
+                            </svg>
+                            <span>Inhabilitación Masiva</span>
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Alerta de Permisos de Sesion (Oculta por defecto, comun a ambos modulos) -->
+                <div id="sessionAlert" class="hidden mb-5 px-4 py-2.5 rounded-lg bg-brand-lightGold/40 border border-brand-gold text-brand-navy text-xs text-left">
                     <span id="sessionAlertText"></span>
                 </div>
 
-                <!-- Formulario Principal -->
-                <form id="unlockForm" class="mt-6 space-y-4" novalidate>
-                    
-                    <!-- Campo de Usuario -->
-                    <div id="inputContainer" class="flex items-center w-full h-11 sm:h-12 rounded-full border border-gray-300 bg-white overflow-hidden transition-colors focus-within:border-brand-green focus-within:ring-2 focus-within:ring-brand-lime/25">
-                        <div class="w-12 h-full bg-gray-100 flex items-center justify-center text-gray-500 border-r border-gray-200 shrink-0">
-                            <svg xmlns="http://www.w3.org/2000/svg" class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.6">
-                                <path stroke-linecap="round" stroke-linejoin="round" d="M15.75 6a3.75 3.75 0 11-7.5 0 3.75 3.75 0 017.5 0zM4.501 20.118a7.5 7.5 0 0114.998 0A17.933 17.933 0 0112 21.75c-2.676 0-5.216-.584-7.499-1.632z" />
-                            </svg>
-                        </div>
-                        <input
-                            type="text"
-                            id="usernameInput"
-                            name="username"
-                            placeholder="nombre.apellido"
-                            autocomplete="off"
-                            spellcheck="false"
-                            aria-label="Usuario de dominio en formato nombre.apellido"
-                            class="w-full h-full px-4 text-sm text-brand-navy placeholder-brand-muted bg-transparent focus:outline-none"
-                        />
-                    </div>
+                <!-- ========================================================= -->
+                <!-- VISTA 1: Gestion Individual (Desbloqueo / Contrasena)     -->
+                <!-- ========================================================= -->
+                <div id="viewIndividual" role="tabpanel" aria-labelledby="tabIndividualBtn">
+                    <h1 class="text-xl sm:text-[22px] font-bold text-brand-navy tracking-tight">
+                        Desbloqueo de Usuarios de Dominio
+                    </h1>
 
-                    <!-- Mensaje de Ayuda de Formato -->
-                    <p id="formatHint" class="hidden text-[11px] text-left pl-4 text-amber-700">
-                        Utilice el formato de cuenta de dominio: nombre.apellido
+                    <p class="mt-2.5 text-xs sm:text-sm text-brand-muted leading-relaxed max-w-[400px] mx-auto">
+                        Ingrese el usuario de red del colaborador para realizar el desbloqueo o cambio de contraseña en el Active Directory.
                     </p>
 
-                    <!-- Contenedor de Botones 50/50 -->
-                    <div class="grid grid-cols-1 sm:grid-cols-2 gap-3 pt-1">
-                        <!-- Boton Izquierdo (50%): Desbloquear Usuario -->
-                        <button
-                            type="submit"
-                            id="unlockBtn"
-                            disabled
-                            class="w-full h-11 sm:h-12 px-4 rounded-full bg-brand-green hover:bg-brand-greenHover active:scale-[0.99] text-white font-medium text-xs sm:text-sm flex items-center justify-center gap-2 shadow-sm transition-all disabled:opacity-50 disabled:pointer-events-none cursor-pointer"
-                        >
-                            <svg id="btnIcon" xmlns="http://www.w3.org/2000/svg" class="w-4 h-4 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.8">
-                                <path stroke-linecap="round" stroke-linejoin="round" d="M13.5 10.5V6.75a4.5 4.5 0 119 0v3.75M3.75 21.75h10.5a2.25 2.25 0 002.25-2.25v-6.75a2.25 2.25 0 00-2.25-2.25H3.75a2.25 2.25 0 00-2.25 2.25v6.75a2.25 2.25 0 002.25 2.25z" />
-                            </svg>
-                            <span id="btnText">Desbloquear Usuario</span>
-                        </button>
+                    <!-- Formulario Principal Individual -->
+                    <form id="unlockForm" class="mt-6 space-y-4" novalidate>
+                        
+                        <!-- Campo de Usuario -->
+                        <div id="inputContainer" class="flex items-center w-full h-11 sm:h-12 rounded-full border border-gray-300 bg-white overflow-hidden transition-colors focus-within:border-brand-green focus-within:ring-2 focus-within:ring-brand-lime/25">
+                            <div class="w-12 h-full bg-gray-100 flex items-center justify-center text-gray-500 border-r border-gray-200 shrink-0">
+                                <svg xmlns="http://www.w3.org/2000/svg" class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.6">
+                                    <path stroke-linecap="round" stroke-linejoin="round" d="M15.75 6a3.75 3.75 0 11-7.5 0 3.75 3.75 0 017.5 0zM4.501 20.118a7.5 7.5 0 0114.998 0A17.933 17.933 0 0112 21.75c-2.676 0-5.216-.584-7.499-1.632z" />
+                                </svg>
+                            </div>
+                            <input
+                                type="text"
+                                id="usernameInput"
+                                name="username"
+                                placeholder="nombre.apellido o usuario"
+                                autocomplete="off"
+                                spellcheck="false"
+                                aria-label="Usuario de dominio"
+                                class="w-full h-full px-4 text-sm text-brand-navy placeholder-brand-muted bg-transparent focus:outline-none"
+                            />
+                        </div>
 
-                        <!-- Boton Derecho (50%): Cambiar Contrasena -->
-                        <button
-                            type="button"
-                            id="openPasswordModalBtn"
-                            disabled
-                            class="w-full h-11 sm:h-12 px-4 rounded-full bg-brand-darkGreen hover:bg-brand-darkGreenHover active:scale-[0.99] text-white font-medium text-xs sm:text-sm flex items-center justify-center gap-2 shadow-sm transition-all disabled:opacity-50 disabled:pointer-events-none cursor-pointer"
-                        >
-                            <svg xmlns="http://www.w3.org/2000/svg" class="w-4 h-4 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.8">
-                                <path stroke-linecap="round" stroke-linejoin="round" d="M15.75 5.25a3 3 0 013 3m3 0a6 6 0 01-7.029 5.912c-.563-.097-1.159.026-1.563.43L10.5 17.25H8.25v2.25H6v2.25H2.25v-2.818c0-.597.237-1.17.659-1.591l6.499-6.499c.404-.404.527-1 .43-1.563A6 6 0 1121.75 8.25z" />
-                            </svg>
-                            <span id="pwdBtnText">Cambiar Contraseña</span>
-                        </button>
-                    </div>
-                </form>
+                        <!-- Mensaje de Ayuda de Formato -->
+                        <p id="formatHint" class="hidden text-[11px] text-left pl-4 text-amber-700">
+                            Ingrese un usuario de dominio válido sin espacios (ej. nombre.apellido o usuario)
+                        </p>
 
-                <!-- Nota al Pie Interna -->
-                <p class="mt-5 text-xs text-brand-navy font-medium">
-                    Solo se procesarán cuentas habilitadas.
-                </p>
+                        <!-- Contenedor de Botones 50/50 -->
+                        <div class="grid grid-cols-1 sm:grid-cols-2 gap-3 pt-1">
+                            <!-- Boton Izquierdo (50%): Desbloquear Usuario -->
+                            <button
+                                type="submit"
+                                id="unlockBtn"
+                                disabled
+                                class="w-full h-11 sm:h-12 px-4 rounded-full bg-brand-green hover:bg-brand-greenHover active:scale-[0.99] text-white font-medium text-xs sm:text-sm flex items-center justify-center gap-2 shadow-sm transition-all disabled:opacity-50 disabled:pointer-events-none cursor-pointer"
+                            >
+                                <svg id="btnIcon" xmlns="http://www.w3.org/2000/svg" class="w-4 h-4 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.8">
+                                    <path stroke-linecap="round" stroke-linejoin="round" d="M13.5 10.5V6.75a4.5 4.5 0 119 0v3.75M3.75 21.75h10.5a2.25 2.25 0 002.25-2.25v-6.75a2.25 2.25 0 00-2.25-2.25H3.75a2.25 2.25 0 00-2.25 2.25v6.75a2.25 2.25 0 002.25 2.25z" />
+                                </svg>
+                                <span id="btnText">Desbloquear Usuario</span>
+                            </button>
+
+                            <!-- Boton Derecho (50%): Cambiar Contrasena -->
+                            <button
+                                type="button"
+                                id="openPasswordModalBtn"
+                                disabled
+                                class="w-full h-11 sm:h-12 px-4 rounded-full bg-brand-darkGreen hover:bg-brand-darkGreenHover active:scale-[0.99] text-white font-medium text-xs sm:text-sm flex items-center justify-center gap-2 shadow-sm transition-all disabled:opacity-50 disabled:pointer-events-none cursor-pointer"
+                            >
+                                <svg xmlns="http://www.w3.org/2000/svg" class="w-4 h-4 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.8">
+                                    <path stroke-linecap="round" stroke-linejoin="round" d="M15.75 5.25a3 3 0 013 3m3 0a6 6 0 01-7.029 5.912c-.563-.097-1.159.026-1.563.43L10.5 17.25H8.25v2.25H6v2.25H2.25v-2.818c0-.597.237-1.17.659-1.591l6.499-6.499c.404-.404.527-1 .43-1.563A6 6 0 1121.75 8.25z" />
+                                </svg>
+                                <span id="pwdBtnText">Cambiar Contraseña</span>
+                            </button>
+                        </div>
+                    </form>
+
+                    <!-- Nota al Pie Interna -->
+                    <p class="mt-5 text-xs text-brand-navy font-medium">
+                        Solo se procesarán cuentas habilitadas.
+                    </p>
+                </div>
+
+                <!-- ========================================================= -->
+                <!-- VISTA 2: Inhabilitacion Masiva por CSV / XLSX             -->
+                <!-- ========================================================= -->
+                <div id="viewBulk" role="tabpanel" aria-labelledby="tabBulkBtn" class="hidden">
+                    <h1 class="text-xl sm:text-[22px] font-bold text-brand-navy tracking-tight">
+                        Inhabilitación Masiva (CSV / XLSX)
+                    </h1>
+
+                    <p class="mt-2.5 text-xs sm:text-sm text-brand-muted leading-relaxed max-w-[430px] mx-auto">
+                        Seleccione el tipo de proceso y cargue un archivo <span class="font-semibold text-brand-navy">.csv</span> o <span class="font-semibold text-brand-navy">.xlsx</span> con las columnas <span class="font-semibold text-brand-navy">NOMBRE</span> y <span class="font-semibold text-brand-navy">APELLIDO</span> para localizar cuentas activas.
+                    </p>
+
+                    <form id="bulkPreviewForm" class="mt-5 space-y-4 text-left" novalidate>
+                        <!-- Selector de Proceso -->
+                        <div>
+                            <label for="bulkProcessSelect" class="block text-xs sm:text-sm font-semibold text-brand-navy mb-1.5">
+                                Tipo de proceso:
+                            </label>
+                            <div class="relative">
+                                <select
+                                    id="bulkProcessSelect"
+                                    name="processType"
+                                    class="w-full h-11 px-4 rounded-xl border border-gray-300 bg-white text-sm text-brand-navy font-medium focus:outline-none focus:border-brand-green focus:ring-2 focus:ring-brand-lime/25 cursor-pointer"
+                                >
+                                    <option value="Vacaciones">Vacaciones</option>
+                                    <option value="Paz y Salvo">Paz y Salvo</option>
+                                </select>
+                            </div>
+                            <!-- Nota dinamica del proceso seleccionado -->
+                            <p id="bulkProcessInfo" class="mt-2 px-3 py-2 rounded-lg bg-gray-50 border border-gray-200 text-xs text-brand-muted leading-relaxed">
+                                Proceso Vacaciones: Solo se inhabilitarán las cuentas seleccionadas. No se modificará la descripción ni se cambiarán de Unidad Organizativa (OU).
+                            </p>
+                        </div>
+
+                        <!-- Selector de Archivo CSV o XLSX -->
+                        <div>
+                            <label for="bulkCsvInput" class="block text-xs sm:text-sm font-semibold text-brand-navy mb-1.5">
+                                Archivo de usuarios (.csv o .xlsx):
+                            </label>
+                            <input
+                                type="file"
+                                id="bulkCsvInput"
+                                name="csvFile"
+                                accept=".csv,.xlsx,text/csv,application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
+                                class="block w-full text-xs sm:text-sm text-brand-navy rounded-xl border border-gray-300 bg-white p-1.5 file:mr-3 file:py-2 file:px-4 file:rounded-lg file:border-0 file:text-xs file:font-semibold file:bg-brand-navy file:text-white hover:file:bg-brand-darkGreen file:cursor-pointer cursor-pointer focus:outline-none focus:border-brand-green"
+                            />
+                            <p id="bulkFileHint" class="mt-1.5 text-[11px] text-brand-muted">
+                                Formatos admitidos: Libro de Excel (.xlsx) o CSV delimitado por coma (,) o punto y coma (;).
+                            </p>
+                        </div>
+
+                        <!-- Boton Analizar Archivo -->
+                        <div class="pt-1">
+                            <button
+                                type="submit"
+                                id="analyzeCsvBtn"
+                                disabled
+                                class="w-full h-11 sm:h-12 px-5 rounded-full bg-brand-green hover:bg-brand-greenHover active:scale-[0.99] text-white font-medium text-xs sm:text-sm flex items-center justify-center gap-2 shadow-sm transition-all disabled:opacity-50 disabled:pointer-events-none cursor-pointer"
+                            >
+                                <svg xmlns="http://www.w3.org/2000/svg" class="w-4 h-4 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.8">
+                                    <path stroke-linecap="round" stroke-linejoin="round" d="M21 21l-5.197-5.197m0 0A7.5 7.5 0 105.196 5.196a7.5 7.5 0 0010.607 10.607z" />
+                                </svg>
+                                <span id="analyzeCsvBtnText">Analizar Archivo</span>
+                            </button>
+                        </div>
+                    </form>
+
+                    <!-- Nota al Pie Interna Masiva -->
+                    <p class="mt-5 text-xs text-brand-navy font-medium text-center">
+                        Las cuentas ya inhabilitadas en el dominio se ignorarán automáticamente.
+                    </p>
+                </div>
+
             </div>
         </section>
 
@@ -290,6 +411,122 @@
         </div>
     </div>
 
+    <!-- Modal de Verificacion Masiva (Reemplazo Web de Out-GridView) -->
+    <div
+        id="bulkVerifyModal"
+        role="dialog"
+        aria-modal="true"
+        aria-labelledby="bulkVerifyModalTitle"
+        class="fixed inset-0 z-40 hidden items-center justify-center px-4 py-6 bg-brand-navy/50 backdrop-blur-[2px] transition-opacity"
+    >
+        <div class="w-full max-w-4xl bg-white rounded-xl shadow-2xl overflow-hidden flex flex-col max-h-[90vh]">
+            <!-- Barra Superior Acentuada Segmentada -->
+            <div class="w-full h-1.5 flex items-center shrink-0">
+                <div class="h-full bg-brand-gold flex-1"></div>
+                <div class="w-2 h-full bg-white"></div>
+                <div class="w-6 h-full bg-brand-gold"></div>
+                <div class="w-2 h-full bg-white"></div>
+                <div class="w-16 h-full bg-brand-gold"></div>
+            </div>
+
+            <!-- Encabezado del Modal de Verificacion -->
+            <div class="px-6 pt-5 pb-4 border-b border-gray-200 flex items-start justify-between gap-4 shrink-0">
+                <div>
+                    <h2 id="bulkVerifyModalTitle" class="text-base sm:text-lg font-bold text-brand-navy">
+                        Verificación de Usuarios Activos
+                    </h2>
+                    <div class="mt-1.5 flex flex-wrap items-center gap-2">
+                        <span id="bulkModalProcessBadge" class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-semibold bg-brand-navy text-white">
+                            Proceso: Vacaciones
+                        </span>
+                        <span id="bulkModalFoundCount" class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-brand-lime/20 text-brand-darkGreen">
+                            0 cuentas activas encontradas
+                        </span>
+                    </div>
+                </div>
+                <button
+                    type="button"
+                    id="closeBulkModalX"
+                    aria-label="Cerrar ventana de verificación masiva"
+                    class="w-8 h-8 rounded-full flex items-center justify-center text-gray-400 hover:text-brand-navy hover:bg-gray-100 transition-colors cursor-pointer shrink-0"
+                >
+                    <svg xmlns="http://www.w3.org/2000/svg" class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.8">
+                        <path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12" />
+                    </svg>
+                </button>
+            </div>
+
+            <!-- Barra de Control: Seleccionar todos y Contador -->
+            <div class="px-6 py-3 bg-gray-50 border-b border-gray-200 flex flex-wrap items-center justify-between gap-3 shrink-0">
+                <label class="flex items-center gap-2.5 cursor-pointer select-none">
+                    <input
+                        type="checkbox"
+                        id="selectAllUsersCheckbox"
+                        class="w-4 h-4 rounded border-gray-300 text-brand-green focus:ring-brand-lime accent-[#208342]"
+                    />
+                    <span class="text-xs sm:text-sm font-semibold text-brand-navy">
+                        Seleccionar todos
+                    </span>
+                </label>
+
+                <span id="selectedUsersCounter" class="text-xs font-semibold text-brand-navy bg-brand-lightGold/50 border border-brand-gold px-3 py-1 rounded-full">
+                    0 de 0 seleccionados
+                </span>
+            </div>
+
+            <!-- Tabla con Scroll Vertical -->
+            <div class="overflow-y-auto overflow-x-auto flex-1 max-h-[340px]">
+                <table class="w-full text-left border-collapse">
+                    <thead class="bg-brand-navy text-white text-xs uppercase tracking-wider sticky top-0 z-10">
+                        <tr>
+                            <th scope="col" class="py-3 px-4 w-14 text-center">Check</th>
+                            <th scope="col" class="py-3 px-4">Nombre</th>
+                            <th scope="col" class="py-3 px-4">Apellido</th>
+                            <th scope="col" class="py-3 px-4">Usuario</th>
+                            <th scope="col" class="py-3 px-4">Estado</th>
+                            <th scope="col" class="py-3 px-4">Descripción</th>
+                        </tr>
+                    </thead>
+                    <tbody id="bulkUsersTableBody" class="divide-y divide-gray-200 text-xs sm:text-sm text-brand-navy bg-white">
+                    </tbody>
+                </table>
+            </div>
+
+            <!-- Seccion Informativa Opcional: Filas del CSV sin coincidencia activa en AD -->
+            <div id="bulkUnmatchedSection" class="hidden px-6 py-3 bg-brand-lightGold/35 border-t border-brand-gold text-left shrink-0">
+                <p id="bulkUnmatchedTitle" class="text-xs font-semibold text-brand-navy">
+                    Registros del CSV sin coincidencia activa en el Directorio Activo:
+                </p>
+                <p id="bulkUnmatchedList" class="mt-1 text-xs text-brand-muted max-h-16 overflow-y-auto">
+                </p>
+            </div>
+
+            <!-- Pie del Modal: Botones Ejecutar y Cancelar -->
+            <div class="px-6 py-4 bg-gray-50 border-t border-gray-200 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 shrink-0">
+                <p class="text-xs text-brand-muted text-left">
+                    Marque únicamente los usuarios que desea inhabilitar y presione Ejecutar.
+                </p>
+                <div class="flex items-center justify-end gap-3">
+                    <button
+                        type="button"
+                        id="executeBulkBtn"
+                        disabled
+                        class="min-w-[130px] h-10 px-5 rounded-full bg-brand-green hover:bg-brand-greenHover text-white text-xs sm:text-sm font-medium transition-all disabled:opacity-50 disabled:pointer-events-none cursor-pointer"
+                    >
+                        <span id="executeBulkBtnText">Ejecutar</span>
+                    </button>
+                    <button
+                        type="button"
+                        id="cancelBulkModalBtn"
+                        class="min-w-[115px] h-10 px-5 rounded-full bg-gray-100 hover:bg-gray-200 text-brand-navy border border-gray-300 text-xs sm:text-sm font-medium transition-colors cursor-pointer"
+                    >
+                        Cancelar
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
     <!-- Modal de Notificacion de Resultado -->
     <div
         id="resultModal"
@@ -326,7 +563,7 @@
                 <p id="modalUserBadge" class="mt-1.5 inline-block px-3 py-0.5 rounded-full bg-gray-100 text-xs font-mono text-brand-navy">
                 </p>
 
-                <p id="modalMessage" class="mt-3 text-sm text-brand-muted leading-relaxed">
+                <p id="modalMessage" class="mt-3 text-sm text-brand-muted leading-relaxed max-h-52 overflow-y-auto">
                 </p>
 
                 <div class="mt-6">
@@ -347,6 +584,13 @@
         (function () {
             'use strict';
 
+            // Selector de Modulo (Pestanas)
+            const tabIndividualBtn = document.getElementById('tabIndividualBtn');
+            const tabBulkBtn = document.getElementById('tabBulkBtn');
+            const viewIndividual = document.getElementById('viewIndividual');
+            const viewBulk = document.getElementById('viewBulk');
+
+            // Elementos del Modulo 1 (Individual)
             const form = document.getElementById('unlockForm');
             const usernameInput = document.getElementById('usernameInput');
             const unlockBtn = document.getElementById('unlockBtn');
@@ -355,6 +599,30 @@
             const pwdBtnText = document.getElementById('pwdBtnText');
             const formatHint = document.getElementById('formatHint');
 
+            // Elementos del Modulo 2 (Inhabilitacion Masiva)
+            const bulkPreviewForm = document.getElementById('bulkPreviewForm');
+            const bulkProcessSelect = document.getElementById('bulkProcessSelect');
+            const bulkProcessInfo = document.getElementById('bulkProcessInfo');
+            const bulkCsvInput = document.getElementById('bulkCsvInput');
+            const analyzeCsvBtn = document.getElementById('analyzeCsvBtn');
+            const analyzeCsvBtnText = document.getElementById('analyzeCsvBtnText');
+
+            // Elementos del Modal de Verificacion Masiva
+            const bulkVerifyModal = document.getElementById('bulkVerifyModal');
+            const bulkModalProcessBadge = document.getElementById('bulkModalProcessBadge');
+            const bulkModalFoundCount = document.getElementById('bulkModalFoundCount');
+            const selectAllUsersCheckbox = document.getElementById('selectAllUsersCheckbox');
+            const selectedUsersCounter = document.getElementById('selectedUsersCounter');
+            const bulkUsersTableBody = document.getElementById('bulkUsersTableBody');
+            const bulkUnmatchedSection = document.getElementById('bulkUnmatchedSection');
+            const bulkUnmatchedTitle = document.getElementById('bulkUnmatchedTitle');
+            const bulkUnmatchedList = document.getElementById('bulkUnmatchedList');
+            const executeBulkBtn = document.getElementById('executeBulkBtn');
+            const executeBulkBtnText = document.getElementById('executeBulkBtnText');
+            const cancelBulkModalBtn = document.getElementById('cancelBulkModalBtn');
+            const closeBulkModalX = document.getElementById('closeBulkModalX');
+
+            // Elementos de Sesion
             const sessionAlert = document.getElementById('sessionAlert');
             const sessionAlertText = document.getElementById('sessionAlertText');
             const statusDot = document.getElementById('statusDot');
@@ -390,13 +658,193 @@
             let isSessionAuthorized = true;
             let isSubmitting = false;
             let isResetSubmitting = false;
+            let isBulkPreviewSubmitting = false;
+            let isBulkExecuteSubmitting = false;
             let activeTargetUser = '';
+            let activeModuleTab = 'individual';
 
-            // Patrón de validación: formato nombre.apellido (letras, números, guiones y al menos un punto intermedio)
-            const USERNAME_REGEX = /^[a-zA-Z0-9_-]+(\.[a-zA-Z0-9_-]+)+$/;
+            // Patron de validacion: acepta cualquier cuenta de dominio sin espacios (ej. nombre.apellido o usuario)
+            const USERNAME_REGEX = /^[a-zA-Z0-9._-]+$/;
 
             function isValidUsername(value) {
                 return USERNAME_REGEX.test(value.trim());
+            }
+
+            // Cambio armonico entre Pestana 1 (Individual) y Pestana 2 (Masivo)
+            function switchModuleTab(targetTab) {
+                activeModuleTab = targetTab === 'bulk' ? 'bulk' : 'individual';
+                const isIndividual = activeModuleTab === 'individual';
+
+                tabIndividualBtn.setAttribute('aria-selected', isIndividual ? 'true' : 'false');
+                tabBulkBtn.setAttribute('aria-selected', isIndividual ? 'false' : 'true');
+
+                const activeClasses = ['bg-brand-navy', 'text-white', 'shadow-sm'];
+                const inactiveClasses = ['text-brand-navy', 'hover:bg-gray-200/70'];
+
+                if (isIndividual) {
+                    tabIndividualBtn.classList.add.apply(tabIndividualBtn.classList, activeClasses);
+                    tabIndividualBtn.classList.remove.apply(tabIndividualBtn.classList, inactiveClasses);
+                    tabBulkBtn.classList.remove.apply(tabBulkBtn.classList, activeClasses);
+                    tabBulkBtn.classList.add.apply(tabBulkBtn.classList, inactiveClasses);
+
+                    viewIndividual.classList.remove('hidden');
+                    viewBulk.classList.add('hidden');
+                } else {
+                    tabBulkBtn.classList.add.apply(tabBulkBtn.classList, activeClasses);
+                    tabBulkBtn.classList.remove.apply(tabBulkBtn.classList, inactiveClasses);
+                    tabIndividualBtn.classList.remove.apply(tabIndividualBtn.classList, activeClasses);
+                    tabIndividualBtn.classList.add.apply(tabIndividualBtn.classList, inactiveClasses);
+
+                    viewBulk.classList.remove('hidden');
+                    viewIndividual.classList.add('hidden');
+                }
+            }
+
+            function updateBulkProcessInfo() {
+                const selectedProcess = bulkProcessSelect.value;
+                if (selectedProcess === 'Paz y Salvo') {
+                    bulkProcessInfo.textContent = 'Proceso Paz y Salvo: Se inhabilitarán las cuentas seleccionadas, se antepondrá el prefijo "(R) " en la descripción y se moverán a la OU AL_INACTIVOS.';
+                } else {
+                    bulkProcessInfo.textContent = 'Proceso Vacaciones: Solo se inhabilitarán las cuentas seleccionadas. No se modificará la descripción ni se cambiarán de Unidad Organizativa (OU).';
+                }
+            }
+
+            function updateAnalyzeButtonState() {
+                const hasFile = bulkCsvInput.files && bulkCsvInput.files.length > 0;
+                analyzeCsvBtn.disabled = !hasFile || !isSessionAuthorized || isBulkPreviewSubmitting;
+            }
+
+            function setBulkPreviewSubmittingState(submitting) {
+                isBulkPreviewSubmitting = submitting;
+                bulkProcessSelect.disabled = submitting || !isSessionAuthorized;
+                bulkCsvInput.disabled = submitting || !isSessionAuthorized;
+                analyzeCsvBtnText.textContent = submitting ? 'Analizando archivo...' : 'Analizar Archivo';
+                updateAnalyzeButtonState();
+            }
+
+            function getBulkUserCheckboxes() {
+                return Array.prototype.slice.call(
+                    bulkUsersTableBody.querySelectorAll('input.bulk-user-checkbox')
+                );
+            }
+
+            function updateBulkSelectionState() {
+                const checkboxes = getBulkUserCheckboxes();
+                const totalCount = checkboxes.length;
+                const selectedCount = checkboxes.filter(function (cb) {
+                    return cb.checked;
+                }).length;
+
+                selectedUsersCounter.textContent = selectedCount + ' de ' + totalCount + ' seleccionados';
+                selectAllUsersCheckbox.checked = totalCount > 0 && selectedCount === totalCount;
+                selectAllUsersCheckbox.indeterminate = selectedCount > 0 && selectedCount < totalCount;
+                executeBulkBtn.disabled = selectedCount === 0 || isBulkExecuteSubmitting;
+            }
+
+            function openBulkVerifyModal(previewData) {
+                const selectedProcess = bulkProcessSelect.value;
+                const users = Array.isArray(previewData.users)
+                    ? previewData.users
+                    : (previewData.users ? [previewData.users] : []);
+                const unmatchedRows = Array.isArray(previewData.unmatchedRows)
+                    ? previewData.unmatchedRows
+                    : (previewData.unmatchedRows ? [previewData.unmatchedRows] : []);
+
+                bulkModalProcessBadge.textContent = 'Proceso: ' + selectedProcess;
+                bulkModalFoundCount.textContent = users.length + (users.length === 1 ? ' cuenta activa encontrada' : ' cuentas activas encontradas');
+
+                bulkUsersTableBody.innerHTML = '';
+
+                users.forEach(function (userObj) {
+                    const tr = document.createElement('tr');
+                    tr.className = 'hover:bg-gray-50 transition-colors cursor-pointer';
+
+                    const tdCheck = document.createElement('td');
+                    tdCheck.className = 'py-2.5 px-4 text-center';
+                    const checkbox = document.createElement('input');
+                    checkbox.type = 'checkbox';
+                    checkbox.checked = false; // Todos los checkboxes inician desmarcados por defecto
+                    checkbox.dataset.username = userObj.usuario || '';
+                    checkbox.className = 'bulk-user-checkbox w-4 h-4 rounded border-gray-300 text-brand-green focus:ring-brand-lime accent-[#208342] cursor-pointer';
+                    checkbox.addEventListener('change', updateBulkSelectionState);
+                    tdCheck.appendChild(checkbox);
+
+                    const tdNombre = document.createElement('td');
+                    tdNombre.className = 'py-2.5 px-4 font-medium';
+                    tdNombre.textContent = userObj.nombre || '';
+
+                    const tdApellido = document.createElement('td');
+                    tdApellido.className = 'py-2.5 px-4 font-medium';
+                    tdApellido.textContent = userObj.apellido || '';
+
+                    const tdUsuario = document.createElement('td');
+                    tdUsuario.className = 'py-2.5 px-4 font-mono text-xs';
+                    tdUsuario.textContent = userObj.usuario || '';
+
+                    const tdEstado = document.createElement('td');
+                    tdEstado.className = 'py-2.5 px-4';
+                    const badgeEstado = document.createElement('span');
+                    badgeEstado.className = 'inline-block px-2 py-0.5 rounded-full text-[11px] font-semibold bg-brand-lime/20 text-brand-green';
+                    badgeEstado.textContent = userObj.estado || 'Activo';
+                    tdEstado.appendChild(badgeEstado);
+
+                    const tdDescripcion = document.createElement('td');
+                    tdDescripcion.className = 'py-2.5 px-4 text-xs text-brand-muted';
+                    tdDescripcion.textContent = userObj.descripcion || '';
+
+                    tr.appendChild(tdCheck);
+                    tr.appendChild(tdNombre);
+                    tr.appendChild(tdApellido);
+                    tr.appendChild(tdUsuario);
+                    tr.appendChild(tdEstado);
+                    tr.appendChild(tdDescripcion);
+
+                    tr.addEventListener('click', function (evt) {
+                        if (evt.target !== checkbox && !checkbox.disabled) {
+                            checkbox.checked = !checkbox.checked;
+                            updateBulkSelectionState();
+                        }
+                    });
+
+                    bulkUsersTableBody.appendChild(tr);
+                });
+
+                if (unmatchedRows.length > 0) {
+                    bulkUnmatchedTitle.textContent = 'Registros del CSV sin coincidencia activa en AD (' + unmatchedRows.length + '):';
+                    bulkUnmatchedList.textContent = unmatchedRows.join(', ');
+                    bulkUnmatchedSection.classList.remove('hidden');
+                } else {
+                    bulkUnmatchedList.textContent = '';
+                    bulkUnmatchedSection.classList.add('hidden');
+                }
+
+                selectAllUsersCheckbox.checked = false;
+                selectAllUsersCheckbox.indeterminate = false;
+                updateBulkSelectionState();
+
+                bulkVerifyModal.classList.remove('hidden');
+                bulkVerifyModal.classList.add('flex');
+            }
+
+            function closeBulkVerifyModal() {
+                bulkVerifyModal.classList.add('hidden');
+                bulkVerifyModal.classList.remove('flex');
+                bulkUsersTableBody.innerHTML = '';
+                selectAllUsersCheckbox.checked = false;
+                selectAllUsersCheckbox.indeterminate = false;
+                updateBulkSelectionState();
+            }
+
+            function setBulkExecuteSubmittingState(submitting) {
+                isBulkExecuteSubmitting = submitting;
+                selectAllUsersCheckbox.disabled = submitting;
+                cancelBulkModalBtn.disabled = submitting;
+                closeBulkModalX.disabled = submitting;
+                getBulkUserCheckboxes().forEach(function (cb) {
+                    cb.disabled = submitting;
+                });
+                executeBulkBtnText.textContent = submitting ? 'Procesando...' : 'Ejecutar';
+                updateBulkSelectionState();
             }
 
             function updateButtonState() {
@@ -453,7 +901,6 @@
                 pwdModalUserBadge.textContent = label;
                 pwdModalLockStatusText.textContent = userInfo.lockedOut ? 'Bloqueado' : 'Desbloqueado';
 
-                // Valores por defecto definidos:
                 newPasswordInput.value = '';
                 confirmPasswordInput.value = '';
                 changeAtLogonCheckbox.checked = true;
@@ -530,7 +977,9 @@
             function hideModal() {
                 resultModal.classList.add('hidden');
                 resultModal.classList.remove('flex');
-                usernameInput.focus();
+                if (activeModuleTab === 'individual') {
+                    usernameInput.focus();
+                }
             }
 
             async function checkSession() {
@@ -557,7 +1006,10 @@
                         sessionAlertText.textContent = data.message || 'Acceso restringido: su cuenta no pertenece al grupo autorizado para soporte.';
                         sessionAlert.classList.remove('hidden');
                         usernameInput.disabled = true;
+                        bulkProcessSelect.disabled = true;
+                        bulkCsvInput.disabled = true;
                         updateButtonState();
+                        updateAnalyzeButtonState();
                     }
                 } catch (_err) {
                     statusDot.classList.remove('bg-brand-lime');
@@ -566,6 +1018,39 @@
                 }
             }
 
+            // Eventos de navegacion entre modulos
+            tabIndividualBtn.addEventListener('click', function () {
+                switchModuleTab('individual');
+            });
+
+            tabBulkBtn.addEventListener('click', function () {
+                switchModuleTab('bulk');
+            });
+
+            // Eventos del Modulo 2 (Inhabilitacion Masiva)
+            bulkProcessSelect.addEventListener('change', updateBulkProcessInfo);
+            bulkCsvInput.addEventListener('change', updateAnalyzeButtonState);
+
+            selectAllUsersCheckbox.addEventListener('change', function () {
+                const targetChecked = selectAllUsersCheckbox.checked;
+                getBulkUserCheckboxes().forEach(function (cb) {
+                    if (!cb.disabled) {
+                        cb.checked = targetChecked;
+                    }
+                });
+                updateBulkSelectionState();
+            });
+
+            cancelBulkModalBtn.addEventListener('click', closeBulkVerifyModal);
+            closeBulkModalX.addEventListener('click', closeBulkVerifyModal);
+
+            bulkVerifyModal.addEventListener('click', function (event) {
+                if (event.target === bulkVerifyModal && !isBulkExecuteSubmitting) {
+                    closeBulkVerifyModal();
+                }
+            });
+
+            // Eventos del Modulo 1 y Modales
             usernameInput.addEventListener('input', updateButtonState);
             newPasswordInput.addEventListener('input', updatePasswordModalButtonState);
             confirmPasswordInput.addEventListener('input', updatePasswordModalButtonState);
@@ -592,6 +1077,8 @@
                         hideModal();
                     } else if (!passwordModal.classList.contains('hidden') && !isResetSubmitting) {
                         closePasswordModal();
+                    } else if (!bulkVerifyModal.classList.contains('hidden') && !isBulkExecuteSubmitting) {
+                        closeBulkVerifyModal();
                     }
                 }
             });
@@ -786,7 +1273,164 @@
                 }
             });
 
+            // Lectura tolerante de archivos CSV (UTF-8 / Windows-1252) y libros Excel (.xlsx en Base64)
+            function arrayBufferToBase64(buffer) {
+                const bytes = new Uint8Array(buffer);
+                const chunkSize = 0x8000;
+                let binary = '';
+                for (let i = 0; i < bytes.length; i += chunkSize) {
+                    const chunk = bytes.subarray(i, i + chunkSize);
+                    binary += String.fromCharCode.apply(null, chunk);
+                }
+                return window.btoa(binary);
+            }
+
+            async function buildBulkPreviewPayload(file) {
+                const fileName = (file.name || '').toLowerCase();
+                const buffer = await file.arrayBuffer();
+                const bytes = new Uint8Array(buffer);
+                const isZipHeader = bytes.length >= 4 && bytes[0] === 0x50 && bytes[1] === 0x4B && bytes[2] === 0x03 && bytes[3] === 0x04;
+
+                if (fileName.endsWith('.xlsx') || isZipHeader) {
+                    return { xlsxBase64: arrayBufferToBase64(buffer) };
+                }
+
+                if (typeof TextDecoder !== 'undefined') {
+                    try {
+                        const utf8Decoder = new TextDecoder('utf-8', { fatal: true });
+                        return { csvContent: utf8Decoder.decode(buffer) };
+                    } catch (_utf8Error) {
+                        const ansiDecoder = new TextDecoder('windows-1252');
+                        return { csvContent: ansiDecoder.decode(buffer) };
+                    }
+                }
+
+                return { csvContent: await file.text() };
+            }
+
+            // Accion Modulo 2 - Paso 1: Analizar Archivo CSV o XLSX (POST /api/masivo/preview)
+            bulkPreviewForm.addEventListener('submit', async function (event) {
+                event.preventDefault();
+
+                const file = bulkCsvInput.files && bulkCsvInput.files[0];
+                if (!file || !isSessionAuthorized || isBulkPreviewSubmitting) {
+                    return;
+                }
+
+                setBulkPreviewSubmittingState(true);
+
+                try {
+                    const requestPayload = await buildBulkPreviewPayload(file);
+                    const response = await fetch('/api/masivo/preview', {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json',
+                            'Accept': 'application/json'
+                        },
+                        body: JSON.stringify(requestPayload)
+                    });
+
+                    let payload = null;
+                    const contentType = response.headers.get('content-type') || '';
+                    if (contentType.indexOf('application/json') !== -1) {
+                        payload = await response.json();
+                    }
+
+                    if (response.ok && payload && payload.success) {
+                        openBulkVerifyModal(payload);
+                    } else {
+                        const errorMsg = (payload && payload.message)
+                            ? payload.message
+                            : 'No fue posible analizar el archivo (HTTP ' + response.status + ').';
+                        showModal({
+                            success: false,
+                            title: (payload && payload.title) ? payload.title : 'Error al analizar archivo',
+                            username: file.name,
+                            message: errorMsg
+                        });
+                    }
+                } catch (_error) {
+                    showModal({
+                        success: false,
+                        title: 'Error de conexión',
+                        username: file.name,
+                        message: 'No se pudo enviar el archivo al servicio local de PowerShell.'
+                    });
+                } finally {
+                    setBulkPreviewSubmittingState(false);
+                }
+            });
+
+            // Accion Modulo 2 - Paso 2: Ejecutar Inhabilitacion Masiva (POST /api/masivo/execute)
+            executeBulkBtn.addEventListener('click', async function () {
+                const selectedUsernames = getBulkUserCheckboxes()
+                    .filter(function (cb) { return cb.checked && cb.dataset.username; })
+                    .map(function (cb) { return cb.dataset.username; });
+
+                if (selectedUsernames.length === 0 || !isSessionAuthorized || isBulkExecuteSubmitting) {
+                    return;
+                }
+
+                const processType = bulkProcessSelect.value;
+                setBulkExecuteSubmittingState(true);
+
+                try {
+                    const response = await fetch('/api/masivo/execute', {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json',
+                            'Accept': 'application/json'
+                        },
+                        body: JSON.stringify({
+                            processType: processType,
+                            usernames: selectedUsernames
+                        })
+                    });
+
+                    let payload = null;
+                    const contentType = response.headers.get('content-type') || '';
+                    if (contentType.indexOf('application/json') !== -1) {
+                        payload = await response.json();
+                    }
+
+                    closeBulkVerifyModal();
+
+                    if (response.ok && payload && payload.success) {
+                        showModal({
+                            success: true,
+                            title: payload.title || ('Inhabilitación masiva exitosa (' + processType + ')'),
+                            username: 'Proceso: ' + processType,
+                            message: payload.message || 'Los usuarios seleccionados fueron procesados correctamente.'
+                        });
+                        bulkCsvInput.value = '';
+                        updateAnalyzeButtonState();
+                    } else {
+                        const errorMsg = (payload && payload.message)
+                            ? payload.message
+                            : 'No fue posible completar la inhabilitación masiva (HTTP ' + response.status + ').';
+                        showModal({
+                            success: false,
+                            title: (payload && payload.title) ? payload.title : 'Error en inhabilitación masiva',
+                            username: 'Proceso: ' + processType,
+                            message: errorMsg
+                        });
+                    }
+                } catch (_error) {
+                    closeBulkVerifyModal();
+                    showModal({
+                        success: false,
+                        title: 'Error de conexión',
+                        username: 'Proceso: ' + processType,
+                        message: 'No se pudo establecer comunicación con el servicio local de PowerShell.'
+                    });
+                } finally {
+                    setBulkExecuteSubmittingState(false);
+                }
+            });
+
+            updateBulkProcessInfo();
             updateButtonState();
+            updateAnalyzeButtonState();
             updatePasswordModalButtonState();
             checkSession();
         })();
